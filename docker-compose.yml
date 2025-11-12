@@ -1,0 +1,35 @@
+services:
+  dvr-vod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dvr-vod-system
+    restart: unless-stopped
+    ports:
+      # 端口映射格式：宿主机端口:容器端口
+      # 如果修改了 config.yml 中的 server.port，需要同步修改容器端口
+      - "8080:8080"
+    volumes:
+      # 挂载配置文件，方便修改 DVR 服务器地址
+      - ./config.yml:/app/config.yml:ro
+      # 可选：挂载日志目录
+      # - ./logs:/app/logs
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - dvr-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  dvr-network:
+    driver: bridge

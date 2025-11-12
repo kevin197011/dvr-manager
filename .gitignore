@@ -1,0 +1,39 @@
+# 二进制文件
+dvr-vod-system
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 测试文件
+*.test
+*.out
+
+# Go 工作区文件
+go.work
+
+# 配置文件（包含敏感信息）
+config.yml
+
+# 生成的图标文件
+favicon-*.png
+favicon.ico
+
+# IDE 文件
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+.favicon_tmp/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db

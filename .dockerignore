@@ -1,0 +1,46 @@
+# Git
+.git
+.gitignore
+
+# 文档
+README.md
+TESTING.md
+*.md
+
+# 测试文件
+test_*.go
+*_test.go
+test_*.html
+
+# 构建产物
+dvr-vod-system
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# 日志
+*.log
+logs/
+
+# 临时文件
+tmp/
+temp/
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 其他
+generate_favicon.html
