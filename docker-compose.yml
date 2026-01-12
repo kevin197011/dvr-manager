@@ -1,21 +1,24 @@
 services:
-  dvr-vod:
+  # 后端服务
+  backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: dvr-vod-system
+    container_name: dvr-vod-backend
     restart: unless-stopped
     ports:
-      # 端口映射格式：宿主机端口:容器端口
-      # 如果修改了 config.yml 中的 server.port，需要同步修改容器端口
       - "8080:8080"
     volumes:
-      # 挂载配置文件，方便修改 DVR 服务器地址
-      - ./config.yml:/app/config.yml:ro
-      # 可选：挂载日志目录
-      # - ./logs:/app/logs
+      # 挂载数据目录（包含数据库文件）
+      - ./data:/app/data:rw
     environment:
       - TZ=Asia/Shanghai
+      - DATA_DIR=/app/data
+      - JWT_SECRET=${JWT_SECRET:-dvr-vod-system-secret-key-change-in-production}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - USER_USERNAME=${USER_USERNAME:-user}
+      - USER_PASSWORD=${USER_PASSWORD:-user123}
     networks:
       - dvr-network
     healthcheck:
@@ -24,6 +27,26 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dvr-vod-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - dvr-network
     logging:
       driver: "json-file"
       options:

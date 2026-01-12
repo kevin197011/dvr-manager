@@ -1,0 +1,172 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.login-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  background: linear-gradient(135deg, 
+    rgba(24, 144, 255, 0.06) 0%, 
+    rgba(64, 169, 255, 0.04) 50%,
+    rgba(24, 144, 255, 0.03) 100%);
+  transition: opacity 0.3s, background 0.3s;
+}
+
+/* 暗色主题下的背景 - 使用 CSS 变量检测 */
+:root[data-theme='dark'] .login-background,
+body[data-theme='dark'] .login-background,
+.ant-theme-dark .login-background {
+  background: linear-gradient(135deg, 
+    rgba(24, 144, 255, 0.15) 0%, 
+    rgba(64, 169, 255, 0.12) 50%,
+    rgba(24, 144, 255, 0.08) 100%);
+}
+
+/* 通过检查背景色是否为深色来判断暗色主题 */
+@media (prefers-color-scheme: dark) {
+  .login-background {
+    background: linear-gradient(135deg, 
+      rgba(24, 144, 255, 0.15) 0%, 
+      rgba(64, 169, 255, 0.12) 50%,
+      rgba(24, 144, 255, 0.08) 100%);
+  }
+}
+
+.login-background-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(24, 144, 255, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(24, 144, 255, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 40% 20%, rgba(24, 144, 255, 0.06) 0%, transparent 60%),
+    radial-gradient(circle at 60% 70%, rgba(64, 169, 255, 0.05) 0%, transparent 50%);
+  background-size: 100% 100%;
+  animation: backgroundMove 25s ease-in-out infinite;
+  opacity: 0.8;
+}
+
+@keyframes backgroundMove {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-2%, -2%) scale(1.05);
+  }
+}
+
+.login-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.login-card {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--ant-color-border-secondary);
+  overflow: hidden;
+}
+
+.login-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.login-card .ant-card-head {
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+  padding: 24px 24px 20px;
+  background: linear-gradient(135deg, 
+    var(--ant-color-primary-bg) 0%, 
+    var(--ant-color-bg-container) 100%);
+}
+
+.login-card .ant-card-head-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+  letter-spacing: 0.5px;
+}
+
+.login-card .ant-card-body {
+  padding: 32px 24px;
+}
+
+.login-card .ant-input-affix-wrapper,
+.login-card .ant-input-password {
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.login-card .ant-input-affix-wrapper:hover,
+.login-card .ant-input-password:hover {
+  border-color: var(--ant-color-primary-hover);
+}
+
+.login-card .ant-input-affix-wrapper-focused,
+.login-card .ant-input-password-focused {
+  border-color: var(--ant-color-primary);
+  box-shadow: 0 0 0 2px var(--ant-color-primary-bg);
+}
+
+.login-card .ant-btn-primary {
+  border-radius: 8px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s;
+}
+
+.login-card .ant-btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.login-tip {
+  text-align: center;
+  margin-top: 16px;
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+  transition: color 0.3s;
+}
+
+.login-footer {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  color: var(--ant-color-text-secondary);
+  font-size: 14px;
+  text-align: center;
+  transition: color 0.3s;
+  opacity: 0.8;
+}
+
+.login-footer:hover {
+  opacity: 1;
+}

@@ -15,11 +15,17 @@
 - ✅ 支持视频拖动（Range 请求）
 - ✅ 系统运行状态监控
 - ✅ 视频下载功能
+- ✅ **用户认证和权限管理（JWT）**
+- ✅ **React + Ant Design 现代化前端界面**
+- ✅ **管理后台（配置管理、DVR 服务器管理）**
 
 ## 技术栈
 
-- **后端**: Golang + Gin Framework
-- **前端**: HTML + CSS + JavaScript
+- **后端**: Golang + Gin Framework (采用 Nunu 项目结构)
+- **前端**: React 18 + Ant Design 5 + Vite
+- **认证**: JWT (JSON Web Token)
+- **架构**: 前后端分离 + 分层架构 (Handler -> Service -> Repository)
+- **数据库**: bbolt (嵌入式键值数据库)
 
 ## 快速开始
 
@@ -32,15 +38,15 @@
 
 **或手动部署：**
 ```bash
-# 1. 配置 DVR 服务器（编辑 config.yml）
-cp config.example.yml config.yml
-vi config.yml
-
-# 2. 启动服务
+# 1. 启动服务（前后端分离）
 docker-compose up -d
 
-# 3. 访问服务
-# 浏览器打开 http://localhost:8080
+# 2. 访问服务
+# 前端: http://localhost (端口 80)
+# 后端 API: http://localhost:8080
+# 默认账号:
+#   - 管理员: admin / admin123
+#   - 普通用户: user / user123
 ```
 
 **查看日志：**
@@ -67,45 +73,82 @@ docker-compose -f docker-compose.nginx.yml up -d
 
 ### 方式二：本地运行
 
-**1. 安装依赖**
+**后端：**
 ```bash
+# 1. 进入后端目录
+cd backend
+
+# 2. 安装依赖
 go mod download
+
+# 3. 运行后端服务器
+go run ./cmd/server
+
+# 后端运行在 http://localhost:8080
 ```
 
-**2. 配置 DVR 服务器**
-
-编辑 `config.yml` 文件：
-```yaml
-server:
-  port: 8080
-  timeout: 30s
-
-dvr:
-  timeout: 10s
-  retry: 3
-
-dvr_servers:
-  - http://your-dvr-server1.com:8080/record
-  - https://your-dvr-server2.com:8080/path
-  - https://your-dvr-server3.com:8080/videos
-
-cors:
-  enabled: true
-  allow_origins: "*"
-```
-
-**3. 运行服务器**
+**前端：**
 ```bash
-go run .
+# 1. 进入前端目录
+cd frontend
+
+# 2. 安装依赖
+npm install
+
+# 3. 启动开发服务器
+npm run dev
+
+# 前端运行在 http://localhost:3000
+# API 请求自动代理到后端
 ```
 
-**4. 访问服务**
-
-浏览器打开：http://localhost:8080
+**访问服务：**
+- 前端开发服务器: http://localhost:3000
+- 默认登录账号:
+  - 管理员: admin / admin123（可访问所有功能）
+  - 普通用户: user / user123（只能访问录像查询）
+- 后端 API: http://localhost:8080
 
 ## API 接口
 
-### 播放录像
+### 认证接口
+
+**登录**
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+
+响应：
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "username": "admin",
+    "role": "admin"
+  }
+}
+```
+
+**获取当前用户信息**
+```http
+GET /api/auth/me
+Authorization: Bearer <token>
+```
+
+**登出**
+```http
+POST /api/auth/logout
+Authorization: Bearer <token>
+```
+
+### 播放录像（可选认证）
 
 **单个查询**
 
@@ -173,6 +216,40 @@ Content-Type: application/json
 }
 ```
 
+### 管理后台 API（需要管理员权限）
+
+**获取系统配置**
+```http
+GET /api/admin/config
+Authorization: Bearer <token>
+```
+
+**获取 DVR 服务器列表**
+```http
+GET /api/admin/dvr-servers
+Authorization: Bearer <token>
+```
+
+**更新 DVR 服务器列表**
+```http
+POST /api/admin/dvr-servers
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "servers": [
+    "http://dvr1.example.com:8080/record",
+    "http://dvr2.example.com:8080/record"
+  ]
+}
+```
+
+**重新加载配置**
+```http
+POST /api/admin/reload
+Authorization: Bearer <token>
+```
+
 ### 健康检查
 
 ```http
@@ -197,9 +274,71 @@ GET /health
 - 支持多用户同时查询不同的录像
 - 请求超时自动取消，不影响其他请求
 
+## 项目结构
+
+```
+dvr-manager/
+├── backend/             # 后端项目
+│   ├── cmd/
+│   │   └── server/      # 应用入口
+│   ├── internal/
+│   │   ├── config/      # 配置管理
+│   │   ├── handler/     # HTTP 处理器
+│   │   ├── middleware/  # 中间件
+│   │   ├── repository/  # 数据访问层
+│   │   ├── router/      # 路由
+│   │   └── service/     # 业务逻辑
+│   ├── pkg/
+│   │   ├── cache/       # 缓存包
+│   │   └── db/          # 数据库包
+│   ├── go.mod           # Go 模块
+│   └── go.sum           # Go 依赖
+├── frontend/            # 前端项目
+│   ├── src/             # 源代码
+│   │   ├── main.jsx     # 应用入口
+│   │   ├── App.jsx      # 根组件
+│   │   ├── pages/       # 页面组件
+│   │   │   ├── Login.jsx    # 登录页
+│   │   │   ├── Home.jsx     # 录像查询页
+│   │   │   └── Admin.jsx    # 管理后台页
+│   │   ├── components/  # 组件
+│   │   ├── services/    # API 服务
+│   │   └── store/       # 状态管理（Zustand）
+│   ├── public/          # 静态资源
+│   ├── index.html       # HTML 入口
+│   ├── package.json     # 依赖配置
+│   ├── vite.config.js   # Vite 配置
+│   └── Dockerfile       # 前端 Dockerfile
+├── data/                # 数据目录（数据库文件）
+├── Dockerfile.backend   # 后端 Dockerfile
+└── docker-compose.yml   # Docker Compose 配置
+```
+
 ## 配置说明
 
-所有配置都在 `config.yml` 文件中：
+所有配置都存储在 bbolt 数据库中，可通过管理后台进行配置。首次启动时，系统会使用默认配置。
+
+### 环境变量
+
+后端支持以下环境变量：
+
+- `DATA_DIR`: 数据目录路径（默认：`/app/data` 或 `../data`）
+- `JWT_SECRET`: JWT 密钥（默认：使用固定密钥，生产环境请务必修改）
+- `ADMIN_USERNAME`: 管理员用户名（默认：`admin`）
+- `ADMIN_PASSWORD`: 管理员密码（默认：`admin123`）
+- `USER_USERNAME`: 普通用户名（默认：`user`）
+- `USER_PASSWORD`: 普通用户密码（默认：`user123`）
+
+**生产环境建议：**
+```bash
+export JWT_SECRET="your-secret-key-here"
+export ADMIN_USERNAME="your-admin-username"
+export ADMIN_PASSWORD="your-strong-password"
+```
+
+### 配置项说明
+
+所有配置可通过管理后台（`/admin`）进行修改：
 
 ### 服务器配置
 - `server.port`: 服务器监听端口（默认 8080）
@@ -285,7 +424,7 @@ curl http://localhost:8080/api/config
 
 **编译：**
 ```bash
-go build -o dvr-vod-system
+go build -o dvr-vod-system ./cmd/server
 ```
 
 **运行：**
