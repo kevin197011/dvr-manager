@@ -23,7 +23,7 @@ var (
 func InitDB(dataDir string) error {
 	dbPath := filepath.Join(dataDir, DBFileName)
 
-	// 检查是否存在旧的 bbolt 数据库文件，如果存在且不是 SQLite 格式，则删除
+	// 检查是否存在旧的数据库文件，如果存在且不是 SQLite 格式，则删除
 	if _, err := os.Stat(dbPath); err == nil {
 		// 文件存在，检查是否是有效的 SQLite 文件
 		file, err := os.Open(dbPath)
@@ -33,7 +33,7 @@ func InitDB(dataDir string) error {
 				// SQLite 文件以 "SQLite format 3" 开头
 				sqliteHeader := "SQLite format 3\x00"
 				if string(header) != sqliteHeader {
-					// 不是 SQLite 格式，可能是旧的 bbolt 文件，删除它
+					// 不是 SQLite 格式，删除旧文件
 					file.Close()
 					log.Printf("[WARN] 检测到旧的数据库文件，正在删除: %s", dbPath)
 					if err := os.Remove(dbPath); err != nil {
