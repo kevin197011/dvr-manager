@@ -9,6 +9,7 @@ import {
   Typography,
   Tag,
   Spin,
+  Tooltip,
 } from 'antd';
 import { SearchOutlined, PlayCircleOutlined, DownloadOutlined } from '@ant-design/icons';
 import { dvrService } from '../services/authService';
@@ -39,11 +40,12 @@ function Home() {
     }
 
     setLoading(true);
-    try {
-      let response;
-      if (ids.length === 1) {
-        response = await dvrService.play(ids[0]);
-        if (response.success) {
+    
+    // 单个查询
+    if (ids.length === 1) {
+      try {
+        const response = await dvrService.play(ids[0]);
+        if (response && response.success) {
           setResults([
             {
               key: ids[0],
@@ -54,21 +56,44 @@ function Home() {
             },
           ]);
         } else {
+          // API 返回失败，但在结果中显示
           setResults([
             {
               key: ids[0],
               recordId: ids[0],
               found: false,
               playing: false,
+              error: response?.message || '未找到',
             },
           ]);
         }
-      } else {
-        response = await dvrService.batchPlay(ids);
-        if (response.success && response.results) {
+      } catch (error) {
+        // 捕获错误（如 404），但在结果中显示，不弹窗
+        let errorMsg = '查询失败';
+        if (error.response?.status === 404) {
+          errorMsg = '未找到';
+        } else if (error.response?.data?.message) {
+          errorMsg = error.response.data.message;
+        } else if (error.message) {
+          errorMsg = error.message;
+        }
+        setResults([
+          {
+            key: ids[0],
+            recordId: ids[0],
+            found: false,
+            playing: false,
+            error: errorMsg,
+          },
+        ]);
+      }
+    } else {
+      // 批量查询
+      try {
+        const response = await dvrService.batchPlay(ids);
+        if (response && response.success && response.results) {
           setResults(
             response.results.map((r, index) => {
-              // 确保 recordId 字段存在，兼容不同的字段名
               const recordId = r.record_id || r.recordId || ids[index] || `record-${index}`;
               return {
                 key: recordId || `key-${index}`,
@@ -76,16 +101,45 @@ function Home() {
                 found: r.found !== undefined ? r.found : false,
                 proxyUrl: r.proxy_url || r.proxyUrl || null,
                 playing: false,
+                error: r.found === false ? (r.message || '未找到') : undefined,
               };
             })
           );
+        } else {
+          // 批量查询失败，为每个 ID 创建失败结果
+          setResults(
+            ids.map((id, index) => ({
+              key: id || `key-${index}`,
+              recordId: id,
+              found: false,
+              playing: false,
+              error: response?.message || '查询失败',
+            }))
+          );
         }
+      } catch (error) {
+        // 批量查询出错，为每个 ID 创建失败结果
+        let errorMsg = '查询失败';
+        if (error.response?.status === 404) {
+          errorMsg = '未找到';
+        } else if (error.response?.data?.message) {
+          errorMsg = error.response.data.message;
+        } else if (error.message) {
+          errorMsg = error.message;
+        }
+        setResults(
+          ids.map((id, index) => ({
+            key: id || `key-${index}`,
+            recordId: id,
+            found: false,
+            playing: false,
+            error: errorMsg,
+          }))
+        );
       }
-    } catch (error) {
-      message.error('查询失败：' + (error.message || '未知错误'));
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   const handleTogglePlay = (recordId) => {
@@ -157,11 +211,21 @@ function Home() {
       title: '状态',
       dataIndex: 'found',
       key: 'found',
-      render: (found) => (
-        <Tag color={found ? 'success' : 'error'}>
-          {found ? '已找到' : '未找到'}
-        </Tag>
-      ),
+      render: (found, record) => {
+        if (found) {
+          return <Tag color="success">已找到</Tag>;
+        }
+        // 未找到时，如果有错误信息，使用 Tooltip 显示详情
+        const errorTag = <Tag color="error">未找到</Tag>;
+        if (record.error) {
+          return (
+            <Tooltip title={record.error}>
+              {errorTag}
+            </Tooltip>
+          );
+        }
+        return errorTag;
+      },
     },
     {
       title: '操作',
