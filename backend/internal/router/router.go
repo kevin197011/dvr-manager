@@ -20,6 +20,9 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 
 	r := gin.Default()
 
+	// 配置请求日志中间件（记录所有请求的 IP）
+	r.Use(middleware.LoggerMiddleware())
+
 	// 配置 CORS 中间件
 	r.Use(middleware.CORSMiddleware(cfg))
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,11 @@ type ConfigResponse struct {
 
 // Handle 返回公开的配置信息
 func (h *ConfigHandler) Handle(c *gin.Context) {
+	clientIP := c.ClientIP()
+	log.Printf("[CONFIG] 获取配置请求 - IP: %s", clientIP)
+	
 	if h.config == nil {
+		log.Printf("[CONFIG] 配置未加载 - IP: %s", clientIP)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "config not loaded",
 		})

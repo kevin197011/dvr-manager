@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"time"
 
@@ -63,8 +64,10 @@ type Claims struct {
 
 // Login 处理登录请求
 func (h *AuthHandler) Login(c *gin.Context) {
+	clientIP := c.ClientIP()
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("[AUTH] 登录请求参数错误 - IP: %s, Error: %v", clientIP, err)
 		c.JSON(http.StatusBadRequest, LoginResponse{
 			Success: false,
 			Message: "请求参数错误",
@@ -72,9 +75,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	log.Printf("[AUTH] 登录尝试 - IP: %s, 用户名: %s", clientIP, req.Username)
+
 	// 验证用户名和密码
 	user, err := h.authService.Authenticate(req.Username, req.Password)
 	if err != nil {
+		log.Printf("[AUTH] 登录失败 - IP: %s, 用户名: %s, Error: %v", clientIP, req.Username, err)
 		c.JSON(http.StatusUnauthorized, LoginResponse{
 			Success: false,
 			Message: "用户名或密码错误",
@@ -85,6 +91,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// 生成 JWT Token
 	token, err := h.generateToken(user.Username, user.Role)
 	if err != nil {
+		log.Printf("[AUTH] 生成令牌失败 - IP: %s, 用户名: %s, Error: %v", clientIP, user.Username, err)
 		c.JSON(http.StatusInternalServerError, LoginResponse{
 			Success: false,
 			Message: "生成令牌失败",
@@ -92,6 +99,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	log.Printf("[AUTH] 登录成功 - IP: %s, 用户名: %s, 角色: %s", clientIP, user.Username, user.Role)
 	c.JSON(http.StatusOK, LoginResponse{
 		Success: true,
 		Token:   token,
@@ -136,6 +144,8 @@ func (h *AuthHandler) Me(c *gin.Context) {
 
 // Logout 处理登出请求
 func (h *AuthHandler) Logout(c *gin.Context) {
+	clientIP := c.ClientIP()
+	log.Printf("[AUTH] 登出请求 - IP: %s", clientIP)
 	// JWT 是无状态的，登出只需要客户端删除 token
 	// 如果需要服务端控制，可以实现 token 黑名单
 	c.JSON(http.StatusOK, gin.H{
