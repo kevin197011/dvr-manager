@@ -1,14 +1,18 @@
+/**
+ * Layout 组件样式 - 统一设计系统
+ */
+
 .app-layout {
   min-height: 100vh;
-  background: var(--ant-color-bg-base);
-  transition: background-color 0.3s ease;
+  background: var(--bg-base);
+  transition: background-color var(--transition-slow) var(--transition-easing);
 }
 
-/* 暗色主题下的布局背景 */
 [data-theme='dark'] .app-layout {
   background: transparent;
 }
 
+/* Logo 区域 */
 .logo {
   height: 64px;
   display: flex;
@@ -16,18 +20,18 @@
   justify-content: center;
   font-size: 18px;
   font-weight: 600;
-  color: var(--ant-color-primary, #1890ff);
-  border-bottom: 1px solid var(--ant-color-border-secondary, #f0f0f0);
-  transition: border-color 0.3s ease, color 0.3s ease;
-  background: var(--ant-color-bg-container);
+  color: var(--color-primary);
+  border-bottom: 1px solid var(--border-secondary);
+  transition: border-color var(--transition-normal) var(--transition-easing),
+              color var(--transition-normal) var(--transition-easing);
+  background: var(--bg-container);
   position: relative;
   overflow: hidden;
 }
 
-/* 暗色主题下的 Logo 区域 */
 [data-theme='dark'] .logo {
-  background: linear-gradient(135deg, rgba(74, 158, 255, 0.1) 0%, var(--ant-color-bg-container) 100%);
-  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, var(--bg-container) 100%);
+  border-bottom-color: var(--border-secondary);
 }
 
 .logo::before {
@@ -37,31 +41,32 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(74, 158, 255, 0.1), transparent);
-  transition: left 0.5s ease;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.5s var(--transition-easing);
 }
 
 [data-theme='dark'] .logo:hover::before {
   left: 100%;
 }
 
+/* Header 区域 */
 .app-header {
-  background: var(--ant-color-bg-container);
-  padding: 0 24px;
+  background: var(--bg-container);
+  padding: 0 var(--spacing-lg);
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  box-shadow: 0 2px 8px var(--ant-color-shadow);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  border-bottom: 1px solid var(--ant-color-border-secondary);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-slow) var(--transition-easing),
+              box-shadow var(--transition-slow) var(--transition-easing);
+  border-bottom: 1px solid var(--border-secondary);
   backdrop-filter: blur(10px);
 }
 
-/* 暗色主题下的 Header */
 [data-theme='dark'] .app-header {
-  background: rgba(26, 31, 46, 0.8);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.8);
+  box-shadow: var(--shadow-md);
+  border-bottom-color: var(--border-secondary);
 }
 
 .header-right {
@@ -70,51 +75,59 @@
 }
 
 .user-info {
-  padding: 0 12px;
+  padding: 0 var(--spacing-md);
+  cursor: pointer;
+  transition: opacity var(--transition-fast) var(--transition-easing);
 }
 
+.user-info:hover {
+  opacity: 0.8;
+}
+
+/* Content 区域 */
 .app-content {
-  margin: 24px;
-  padding: 24px;
-  background: var(--ant-color-bg-container);
-  border-radius: 8px;
+  margin: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--bg-container);
+  border-radius: var(--radius-lg);
   min-height: calc(100vh - 160px);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 1px 4px var(--ant-color-shadow);
+  transition: background-color var(--transition-slow) var(--transition-easing),
+              box-shadow var(--transition-slow) var(--transition-easing);
+  box-shadow: var(--shadow-sm);
 }
 
-/* 暗色主题下的内容区域 */
 [data-theme='dark'] .app-content {
-  background: rgba(26, 31, 46, 0.6);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.6);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-secondary);
   backdrop-filter: blur(10px);
 }
 
+/* Footer 区域 */
 .app-footer {
-  background: var(--ant-color-bg-container);
-  border-top: 1px solid var(--ant-color-border-secondary);
-  padding: 16px 24px;
+  background: var(--bg-container);
+  border-top: 1px solid var(--border-secondary);
+  padding: var(--spacing-md) var(--spacing-lg);
   text-align: center;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  transition: background-color var(--transition-slow) var(--transition-easing),
+              border-color var(--transition-slow) var(--transition-easing);
 }
 
-/* 暗色主题下的 Footer */
 [data-theme='dark'] .app-footer {
-  background: rgba(26, 31, 46, 0.8);
-  border-top-color: rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.8);
+  border-top-color: var(--border-secondary);
   backdrop-filter: blur(10px);
 }
 
 .app-footer div {
-  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.45));
-  transition: color 0.3s ease;
+  color: var(--text-secondary);
+  transition: color var(--transition-slow) var(--transition-easing);
 }
 
-/* 暗色主题下的侧边栏 */
+/* 侧边栏暗色主题优化 */
 [data-theme='dark'] .ant-layout-sider {
-  background: rgba(15, 20, 25, 0.9) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-right: 1px solid var(--border-secondary) !important;
   backdrop-filter: blur(10px);
 }
 
@@ -123,20 +136,32 @@
 }
 
 [data-theme='dark'] .ant-menu-item {
-  border-radius: 6px;
-  margin: 4px 8px !important;
-  transition: all 0.3s ease;
+  border-radius: var(--radius-sm);
+  margin: var(--spacing-xs) var(--spacing-sm) !important;
+  transition: all var(--transition-normal) var(--transition-easing);
 }
 
 [data-theme='dark'] .ant-menu-item:hover {
-  background: rgba(74, 158, 255, 0.15) !important;
+  background: rgba(59, 130, 246, 0.15) !important;
 }
 
 [data-theme='dark'] .ant-menu-item-selected {
-  background: rgba(74, 158, 255, 0.25) !important;
-  color: #4A9EFF !important;
+  background: rgba(59, 130, 246, 0.25) !important;
+  color: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .ant-menu-item-selected::after {
   display: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .app-content {
+    margin: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+  
+  .app-header {
+    padding: 0 var(--spacing-md);
+  }
 }

@@ -39,6 +39,16 @@ api.interceptors.response.use(
       localStorage.removeItem('auth-storage');
       window.location.href = '/login';
     }
+    // 保留错误响应数据，以便前端可以访问错误信息
+    if (error.response?.data) {
+      return Promise.reject({
+        ...error,
+        response: {
+          ...error.response,
+          data: error.response.data,
+        },
+      });
+    }
     return Promise.reject(error);
   }
 );

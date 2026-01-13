@@ -1,46 +1,119 @@
+/**
+ * 全局样式 - 统一设计系统
+ * 基于 Minimalism + Dark Mode (OLED) 风格
+ */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+:root {
+  /* 使用 CSS 变量，由 main.jsx 动态设置 */
+  --color-primary: #3B82F6;
+  --color-primary-hover: #2563EB;
+  --color-primary-active: #1D4ED8;
+  
+  --color-success: #22C55E;
+  --color-warning: #F97316;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+  
+  --bg-base: #FFFFFF;
+  --bg-container: #F8FAFC;
+  --bg-elevated: #FFFFFF;
+  --bg-layout: #F8FAFC;
+  
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-tertiary: #94A3B8;
+  --text-disabled: #CBD5E1;
+  
+  --border-primary: #E2E8F0;
+  --border-secondary: #F1F5F9;
+  --border-tertiary: #F8FAFC;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  
+  --transition-fast: 150ms;
+  --transition-normal: 200ms;
+  --transition-slow: 300ms;
+  --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  background-color: var(--ant-color-bg-base, #fff);
-  color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
+  transition: background-color var(--transition-slow) var(--transition-easing),
+              color var(--transition-slow) var(--transition-easing);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.5;
 }
 
-/* 暗色主题下的背景渐变 */
+/* 暗色主题下的全局样式 */
+[data-theme='dark'] {
+  --bg-base: #0F172A;
+  --bg-container: #1E293B;
+  --bg-elevated: #334155;
+  --bg-layout: #0F172A;
+  
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-tertiary: #94A3B8;
+  --text-disabled: #64748B;
+  
+  --border-primary: rgba(255, 255, 255, 0.12);
+  --border-secondary: rgba(255, 255, 255, 0.08);
+  --border-tertiary: rgba(255, 255, 255, 0.05);
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
 [data-theme='dark'] body {
-  background: linear-gradient(135deg, #0F1419 0%, #1A1F2E 50%, #0F1419 100%);
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
-  background-color: var(--ant-color-bg-base, #fff);
-  transition: background-color 0.3s ease;
+  background-color: var(--bg-base);
+  transition: background-color var(--transition-slow) var(--transition-easing);
 }
 
-/* 暗色主题下的根元素 */
 [data-theme='dark'] #root {
   background: transparent;
 }
 
-/* 暗色主题下的 Ant Design 组件优化 */
+/* Ant Design 组件暗色主题优化 */
 [data-theme='dark'] .ant-card {
-  background: rgba(26, 31, 46, 0.6) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  background: var(--bg-container) !important;
+  border-color: var(--border-primary) !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
 [data-theme='dark'] .ant-card-head {
-  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
-  background: rgba(26, 31, 46, 0.8) !important;
+  border-bottom-color: var(--border-secondary) !important;
+  background: var(--bg-elevated) !important;
 }
 
 [data-theme='dark'] .ant-table {
@@ -48,117 +121,128 @@ body {
 }
 
 [data-theme='dark'] .ant-table-thead > tr > th {
-  background: rgba(37, 43, 58, 0.6) !important;
-  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
-  color: rgba(255, 255, 255, 0.95) !important;
+  background: var(--bg-elevated) !important;
+  border-bottom-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
 }
 
 [data-theme='dark'] .ant-table-tbody > tr > td {
-  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  border-bottom-color: var(--border-secondary) !important;
 }
 
 [data-theme='dark'] .ant-table-tbody > tr:hover > td {
-  background: rgba(74, 158, 255, 0.1) !important;
+  background: rgba(59, 130, 246, 0.1) !important;
 }
 
 [data-theme='dark'] .ant-input,
 [data-theme='dark'] .ant-input-affix-wrapper,
 [data-theme='dark'] .ant-input-password {
-  background: rgba(37, 43, 58, 0.6) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: rgba(255, 255, 255, 0.95) !important;
+  background: var(--bg-elevated) !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
 }
 
 [data-theme='dark'] .ant-input:hover,
 [data-theme='dark'] .ant-input-affix-wrapper:hover,
 [data-theme='dark'] .ant-input-password:hover {
-  border-color: rgba(74, 158, 255, 0.5) !important;
+  border-color: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .ant-input:focus,
 [data-theme='dark'] .ant-input-affix-wrapper-focused,
 [data-theme='dark'] .ant-input-password-focused {
-  border-color: #4A9EFF !important;
-  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
 }
 
 [data-theme='dark'] .ant-input-number {
-  background: rgba(37, 43, 58, 0.6) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: var(--bg-elevated) !important;
+  border-color: var(--border-primary) !important;
 }
 
 [data-theme='dark'] .ant-input-number:hover {
-  border-color: rgba(74, 158, 255, 0.5) !important;
+  border-color: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .ant-input-number-focused {
-  border-color: #4A9EFF !important;
-  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
 }
 
 [data-theme='dark'] .ant-select-selector {
-  background: rgba(37, 43, 58, 0.6) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: var(--bg-elevated) !important;
+  border-color: var(--border-primary) !important;
 }
 
 [data-theme='dark'] .ant-select:hover .ant-select-selector {
-  border-color: rgba(74, 158, 255, 0.5) !important;
+  border-color: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .ant-select-focused .ant-select-selector {
-  border-color: #4A9EFF !important;
-  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
 }
 
 [data-theme='dark'] .ant-tabs-tab {
-  color: rgba(255, 255, 255, 0.75) !important;
+  color: var(--text-secondary) !important;
 }
 
 [data-theme='dark'] .ant-tabs-tab:hover {
-  color: rgba(255, 255, 255, 0.95) !important;
+  color: var(--text-primary) !important;
 }
 
 [data-theme='dark'] .ant-tabs-tab-active {
-  color: #4A9EFF !important;
+  color: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .ant-tabs-ink-bar {
-  background: #4A9EFF !important;
+  background: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .ant-divider {
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--border-secondary) !important;
 }
 
 [data-theme='dark'] .ant-alert {
-  background: rgba(37, 43, 58, 0.6) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: var(--bg-elevated) !important;
+  border-color: var(--border-primary) !important;
 }
 
 [data-theme='dark'] .ant-descriptions-item-label {
-  color: rgba(255, 255, 255, 0.75) !important;
+  color: var(--text-secondary) !important;
 }
 
 [data-theme='dark'] .ant-descriptions-item-content {
-  color: rgba(255, 255, 255, 0.95) !important;
+  color: var(--text-primary) !important;
 }
 
 [data-theme='dark'] .ant-switch-checked {
-  background: #4A9EFF !important;
+  background: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .ant-btn-link {
-  color: #4A9EFF !important;
+  color: var(--color-primary) !important;
 }
 
 [data-theme='dark'] .ant-btn-link:hover {
-  color: #5BAEFF !important;
+  color: var(--color-primary-hover) !important;
 }
 
 [data-theme='dark'] .ant-typography {
-  color: rgba(255, 255, 255, 0.95) !important;
+  color: var(--text-primary) !important;
 }
 
 [data-theme='dark'] .ant-typography-secondary {
-  color: rgba(255, 255, 255, 0.75) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* 减少动画（尊重 prefers-reduced-motion） */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

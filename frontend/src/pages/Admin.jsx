@@ -39,6 +39,21 @@ function Admin() {
   const [servers, setServers] = useState([]);
   const [config, setConfig] = useState(null);
   const [form] = Form.useForm();
+  
+  // 初始化默认配置值
+  useEffect(() => {
+    form.setFieldsValue({
+      server: {
+        port: 8080,
+        timeout: 30,
+      },
+      dvr: {
+        timeout: 10,
+        retry: 3,
+        skip_tls_verify: true,
+      },
+    });
+  }, [form]);
 
   useEffect(() => {
     loadData();
@@ -52,16 +67,25 @@ function Admin() {
         adminService.getConfig(),
       ]);
 
-      if (serversRes.success) {
+      // 处理服务器列表
+      if (serversRes && serversRes.success) {
         setServers(
-          serversRes.servers.map((server, index) => ({
+          (serversRes.servers || []).map((server, index) => ({
             key: index,
             server,
           }))
         );
+      } else if (serversRes && !serversRes.success) {
+        // 如果返回了错误，但请求成功，显示警告
+        console.warn('获取服务器列表失败:', serversRes.message || '未知错误');
+        // 初始化时服务器列表为空是正常的，不显示错误
+        if (serversRes.message && !serversRes.message.includes('empty')) {
+          message.warning(serversRes.message || '获取服务器列表失败');
+        }
       }
 
-      if (configRes.success) {
+      // 处理配置
+      if (configRes && configRes.success) {
         setConfig(configRes.config);
         // 转换时间单位：后端 time.Duration 序列化为纳秒（int64），前端显示秒
         const config = configRes.config;
@@ -85,9 +109,35 @@ function Admin() {
           },
         };
         form.setFieldsValue(formValues);
+      } else if (configRes && !configRes.success) {
+        console.error('获取配置失败:', configRes.message || '未知错误');
+        message.error(configRes.message || '获取配置失败');
       }
     } catch (error) {
-      message.error('加载数据失败');
+      console.error('加载数据失败:', error);
+      const errorMessage = error.response?.data?.message 
+        || error.message 
+        || '加载数据失败，请检查网络连接或稍后重试';
+      message.error(errorMessage);
+      
+      // 如果是初始化，设置默认值
+      if (!servers || servers.length === 0) {
+        setServers([]);
+      }
+      if (!config) {
+        // 设置默认配置值
+        form.setFieldsValue({
+          server: {
+            port: 8080,
+            timeout: 30,
+          },
+          dvr: {
+            timeout: 10,
+            retry: 3,
+            skip_tls_verify: true,
+          },
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -173,7 +223,7 @@ function Admin() {
       key: 'index',
       width: 80,
       render: (_, __, index) => (
-        <Text strong style={{ color: '#1890ff' }}>#{index + 1}</Text>
+        <Text strong style={{ color: 'var(--color-primary)' }}>#{index + 1}</Text>
       ),
     },
     {
@@ -436,7 +486,7 @@ function Admin() {
                           <span>
                             跳过 TLS 证书验证
                             <Tooltip title="适用于自签名证书或内网环境，生产环境建议关闭">
-                              <InfoCircleOutlined style={{ marginLeft: 4, color: '#999' }} />
+                              <InfoCircleOutlined style={{ marginLeft: 4, color: 'var(--text-tertiary)' }} />
                             </Tooltip>
                           </span>
                         }
