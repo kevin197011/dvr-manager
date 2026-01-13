@@ -1,7 +1,12 @@
 .app-layout {
   min-height: 100vh;
   background: var(--ant-color-bg-base);
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
+}
+
+/* 暗色主题下的布局背景 */
+[data-theme='dark'] .app-layout {
+  background: transparent;
 }
 
 .logo {
@@ -13,7 +18,31 @@
   font-weight: 600;
   color: var(--ant-color-primary, #1890ff);
   border-bottom: 1px solid var(--ant-color-border-secondary, #f0f0f0);
-  transition: border-color 0.3s, color 0.3s;
+  transition: border-color 0.3s ease, color 0.3s ease;
+  background: var(--ant-color-bg-container);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 暗色主题下的 Logo 区域 */
+[data-theme='dark'] .logo {
+  background: linear-gradient(135deg, rgba(74, 158, 255, 0.1) 0%, var(--ant-color-bg-container) 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.logo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(74, 158, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+[data-theme='dark'] .logo:hover::before {
+  left: 100%;
 }
 
 .app-header {
@@ -23,7 +52,16 @@
   align-items: center;
   justify-content: flex-end;
   box-shadow: 0 2px 8px var(--ant-color-shadow);
-  transition: background-color 0.3s, box-shadow 0.3s;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+  backdrop-filter: blur(10px);
+}
+
+/* 暗色主题下的 Header */
+[data-theme='dark'] .app-header {
+  background: rgba(26, 31, 46, 0.8);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .header-right {
@@ -41,7 +79,16 @@
   background: var(--ant-color-bg-container);
   border-radius: 8px;
   min-height: calc(100vh - 160px);
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 1px 4px var(--ant-color-shadow);
+}
+
+/* 暗色主题下的内容区域 */
+[data-theme='dark'] .app-content {
+  background: rgba(26, 31, 46, 0.6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
 }
 
 .app-footer {
@@ -49,10 +96,47 @@
   border-top: 1px solid var(--ant-color-border-secondary);
   padding: 16px 24px;
   text-align: center;
-  transition: background-color 0.3s, border-color 0.3s;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* 暗色主题下的 Footer */
+[data-theme='dark'] .app-footer {
+  background: rgba(26, 31, 46, 0.8);
+  border-top-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
 }
 
 .app-footer div {
   color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.45));
-  transition: color 0.3s;
+  transition: color 0.3s ease;
+}
+
+/* 暗色主题下的侧边栏 */
+[data-theme='dark'] .ant-layout-sider {
+  background: rgba(15, 20, 25, 0.9) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+[data-theme='dark'] .ant-menu {
+  background: transparent !important;
+}
+
+[data-theme='dark'] .ant-menu-item {
+  border-radius: 6px;
+  margin: 4px 8px !important;
+  transition: all 0.3s ease;
+}
+
+[data-theme='dark'] .ant-menu-item:hover {
+  background: rgba(74, 158, 255, 0.15) !important;
+}
+
+[data-theme='dark'] .ant-menu-item-selected {
+  background: rgba(74, 158, 255, 0.25) !important;
+  color: #4A9EFF !important;
+}
+
+[data-theme='dark'] .ant-menu-item-selected::after {
+  display: none;
 }

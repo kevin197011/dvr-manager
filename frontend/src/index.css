@@ -8,13 +8,157 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.3s ease, color 0.3s ease;
   background-color: var(--ant-color-bg-base, #fff);
   color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
+}
+
+/* 暗色主题下的背景渐变 */
+[data-theme='dark'] body {
+  background: linear-gradient(135deg, #0F1419 0%, #1A1F2E 50%, #0F1419 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
   background-color: var(--ant-color-bg-base, #fff);
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
+}
+
+/* 暗色主题下的根元素 */
+[data-theme='dark'] #root {
+  background: transparent;
+}
+
+/* 暗色主题下的 Ant Design 组件优化 */
+[data-theme='dark'] .ant-card {
+  background: rgba(26, 31, 46, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme='dark'] .ant-card-head {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(26, 31, 46, 0.8) !important;
+}
+
+[data-theme='dark'] .ant-table {
+  background: transparent !important;
+}
+
+[data-theme='dark'] .ant-table-thead > tr > th {
+  background: rgba(37, 43, 58, 0.6) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme='dark'] .ant-table-tbody > tr > td {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme='dark'] .ant-table-tbody > tr:hover > td {
+  background: rgba(74, 158, 255, 0.1) !important;
+}
+
+[data-theme='dark'] .ant-input,
+[data-theme='dark'] .ant-input-affix-wrapper,
+[data-theme='dark'] .ant-input-password {
+  background: rgba(37, 43, 58, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme='dark'] .ant-input:hover,
+[data-theme='dark'] .ant-input-affix-wrapper:hover,
+[data-theme='dark'] .ant-input-password:hover {
+  border-color: rgba(74, 158, 255, 0.5) !important;
+}
+
+[data-theme='dark'] .ant-input:focus,
+[data-theme='dark'] .ant-input-affix-wrapper-focused,
+[data-theme='dark'] .ant-input-password-focused {
+  border-color: #4A9EFF !important;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2) !important;
+}
+
+[data-theme='dark'] .ant-input-number {
+  background: rgba(37, 43, 58, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme='dark'] .ant-input-number:hover {
+  border-color: rgba(74, 158, 255, 0.5) !important;
+}
+
+[data-theme='dark'] .ant-input-number-focused {
+  border-color: #4A9EFF !important;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2) !important;
+}
+
+[data-theme='dark'] .ant-select-selector {
+  background: rgba(37, 43, 58, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme='dark'] .ant-select:hover .ant-select-selector {
+  border-color: rgba(74, 158, 255, 0.5) !important;
+}
+
+[data-theme='dark'] .ant-select-focused .ant-select-selector {
+  border-color: #4A9EFF !important;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2) !important;
+}
+
+[data-theme='dark'] .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+[data-theme='dark'] .ant-tabs-tab:hover {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme='dark'] .ant-tabs-tab-active {
+  color: #4A9EFF !important;
+}
+
+[data-theme='dark'] .ant-tabs-ink-bar {
+  background: #4A9EFF !important;
+}
+
+[data-theme='dark'] .ant-divider {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme='dark'] .ant-alert {
+  background: rgba(37, 43, 58, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme='dark'] .ant-descriptions-item-label {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+[data-theme='dark'] .ant-descriptions-item-content {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme='dark'] .ant-switch-checked {
+  background: #4A9EFF !important;
+}
+
+[data-theme='dark'] .ant-btn-link {
+  color: #4A9EFF !important;
+}
+
+[data-theme='dark'] .ant-btn-link:hover {
+  color: #5BAEFF !important;
+}
+
+[data-theme='dark'] .ant-typography {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme='dark'] .ant-typography-secondary {
+  color: rgba(255, 255, 255, 0.75) !important;
 }

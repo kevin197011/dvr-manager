@@ -20,26 +20,41 @@
     rgba(24, 144, 255, 0.06) 0%, 
     rgba(64, 169, 255, 0.04) 50%,
     rgba(24, 144, 255, 0.03) 100%);
-  transition: opacity 0.3s, background 0.3s;
+  transition: opacity 0.3s ease, background 0.3s ease;
 }
 
-/* 暗色主题下的背景 - 使用 CSS 变量检测 */
-:root[data-theme='dark'] .login-background,
-body[data-theme='dark'] .login-background,
-.ant-theme-dark .login-background {
+/* 暗色主题下的背景 - 使用更优雅的深色渐变 */
+[data-theme='dark'] .login-background {
   background: linear-gradient(135deg, 
-    rgba(24, 144, 255, 0.15) 0%, 
-    rgba(64, 169, 255, 0.12) 50%,
-    rgba(24, 144, 255, 0.08) 100%);
+    #0F1419 0%, 
+    #1A1F2E 30%,
+    #252B3A 60%,
+    #1A1F2E 100%);
 }
 
-/* 通过检查背景色是否为深色来判断暗色主题 */
-@media (prefers-color-scheme: dark) {
-  .login-background {
-    background: linear-gradient(135deg, 
-      rgba(24, 144, 255, 0.15) 0%, 
-      rgba(64, 169, 255, 0.12) 50%,
-      rgba(24, 144, 255, 0.08) 100%);
+/* 添加动态背景效果 */
+[data-theme='dark'] .login-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(74, 158, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(82, 196, 26, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(74, 158, 255, 0.08) 0%, transparent 70%);
+  animation: backgroundPulse 8s ease-in-out infinite;
+}
+
+@keyframes backgroundPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
   }
 }
 
@@ -86,6 +101,37 @@ body[data-theme='dark'] .login-background,
   background: var(--ant-color-bg-container);
   border: 1px solid var(--ant-color-border-secondary);
   overflow: hidden;
+  position: relative;
+}
+
+/* 暗色主题下的登录卡片 */
+[data-theme='dark'] .login-card {
+  background: rgba(26, 31, 46, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--ant-color-primary), 
+    transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+[data-theme='dark'] .login-card::before {
+  opacity: 0.6;
 }
 
 .login-card:hover {
@@ -95,12 +141,32 @@ body[data-theme='dark'] .login-background,
     0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
+[data-theme='dark'] .login-card:hover {
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-color: rgba(74, 158, 255, 0.3);
+}
+
+[data-theme='dark'] .login-card:hover::before {
+  opacity: 1;
+}
+
 .login-card .ant-card-head {
   border-bottom: 1px solid var(--ant-color-border-secondary);
   padding: 24px 24px 20px;
   background: linear-gradient(135deg, 
     var(--ant-color-primary-bg) 0%, 
     var(--ant-color-bg-container) 100%);
+}
+
+/* 暗色主题下的卡片头部 */
+[data-theme='dark'] .login-card .ant-card-head {
+  background: linear-gradient(135deg, 
+    rgba(74, 158, 255, 0.15) 0%, 
+    rgba(26, 31, 46, 0.8) 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .login-card .ant-card-head-title {
@@ -138,12 +204,25 @@ body[data-theme='dark'] .login-background,
   font-size: 16px;
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
 
 .login-card .ant-btn-primary:hover {
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
   transform: translateY(-1px);
+}
+
+/* 暗色主题下的按钮 */
+[data-theme='dark'] .login-card .ant-btn-primary {
+  background: linear-gradient(135deg, #4A9EFF 0%, #357ABD 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+}
+
+[data-theme='dark'] .login-card .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #5BAEFF 0%, #4A9EFF 100%);
+  box-shadow: 0 6px 16px rgba(74, 158, 255, 0.5);
+  transform: translateY(-2px);
 }
 
 .login-tip {

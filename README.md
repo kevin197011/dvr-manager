@@ -71,6 +71,36 @@ docker-compose -f docker-compose.nginx.yml up -d
 
 详细 Nginx 配置请查看 [NGINX.md](NGINX.md)
 
+**使用 GitHub Packages 镜像：**
+
+项目已配置 GitHub Actions 自动构建并推送 Docker 镜像到 GitHub Packages。你可以直接使用预构建的镜像：
+
+```bash
+# 1. 登录 GitHub Container Registry（首次使用需要）
+echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+
+# 2. 拉取镜像
+docker pull ghcr.io/OWNER/dvr-manager/backend:latest
+docker pull ghcr.io/OWNER/dvr-manager/frontend:latest
+
+# 3. 更新 docker-compose.yml 使用预构建镜像
+# 将 build 部分替换为 image 配置
+```
+
+或者直接修改 `docker-compose.yml`：
+
+```yaml
+services:
+  backend:
+    image: ghcr.io/OWNER/dvr-manager/backend:latest
+    # 移除 build 配置
+  frontend:
+    image: ghcr.io/OWNER/dvr-manager/frontend:latest
+    # 移除 build 配置
+```
+
+**注意**：将 `OWNER` 替换为你的 GitHub 用户名或组织名。
+
 ### 方式二：本地运行
 
 **后端：**
@@ -404,6 +434,42 @@ curl http://localhost:8080/api/config
 }
 ```
 
+## CI/CD
+
+项目已配置 GitHub Actions 自动构建和推送 Docker 镜像到 GitHub Packages。
+
+### 工作流说明
+
+- **触发条件**：
+  - 推送到 `main` 或 `develop` 分支
+  - 创建版本标签（`v*`）
+  - 手动触发（workflow_dispatch）
+  - Pull Request（仅构建，不推送）
+
+- **构建内容**：
+  - 后端 Docker 镜像（`ghcr.io/OWNER/dvr-manager/backend`）
+  - 前端 Docker 镜像（`ghcr.io/OWNER/dvr-manager/frontend`）
+
+- **镜像标签**：
+  - `latest`：主分支的最新构建
+  - `分支名`：对应分支的构建
+  - `v1.0.0`：版本标签构建
+  - `分支名-SHA`：包含提交 SHA 的构建
+
+### 使用预构建镜像
+
+```bash
+# 1. 创建 GitHub Personal Access Token (PAT)
+# 需要 packages:read 权限
+
+# 2. 登录 GitHub Container Registry
+echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+
+# 3. 拉取镜像
+docker pull ghcr.io/OWNER/dvr-manager/backend:latest
+docker pull ghcr.io/OWNER/dvr-manager/frontend:latest
+```
+
 ## 生产部署
 
 ### Docker 部署（推荐）
@@ -413,6 +479,15 @@ curl http://localhost:8080/api/config
 **快速部署：**
 ```bash
 ./deploy.sh
+```
+
+**使用预构建镜像部署：**
+```bash
+# 1. 登录 GitHub Container Registry
+echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+
+# 2. 使用预构建镜像（需要将 docker-compose.packages.yml 中的 OWNER 替换为你的 GitHub 用户名）
+docker-compose -f docker-compose.packages.yml up -d
 ```
 
 **使用 Nginx 反向代理：**

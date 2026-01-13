@@ -1,0 +1,54 @@
+services:
+  # 后端服务
+  backend:
+    image: ghcr.io/kevin97011/dvr-manager/backend:latest
+    container_name: dvr-vod-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # 挂载数据目录（包含数据库文件）
+      - ./data:/app/data:rw
+    environment:
+      - TZ=Asia/Shanghai
+      - DATA_DIR=/app/data
+      - JWT_SECRET=${JWT_SECRET:-dvr-vod-system-secret-key-change-in-production}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - USER_USERNAME=${USER_USERNAME:-user}
+      - USER_PASSWORD=${USER_PASSWORD:-user123}
+    networks:
+      - dvr-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 前端服务
+  frontend:
+    image: ghcr.io/kevin97011/dvr-manager/frontend:latest
+    container_name: dvr-vod-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - dvr-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  dvr-network:
+    driver: bridge
