@@ -49,7 +49,8 @@ func InitDB(dataDir string) error {
 	}
 
 	var err error
-	db, err = sql.Open("sqlite", dbPath)
+	// 使用 SQLite 连接参数优化，避免锁定问题
+	db, err = sql.Open("sqlite", dbPath+"?_journal_mode=WAL&_busy_timeout=5000&_foreign_keys=1")
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
