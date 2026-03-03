@@ -125,7 +125,14 @@ function Audit() {
     { title: '用户', dataIndex: 'username', key: 'username', width: 100, ellipsis: true },
     { title: '角色', dataIndex: 'role', key: 'role', width: 80 },
     { title: '客户端 IP', dataIndex: 'client_ip', key: 'client_ip', width: 120 },
-    { title: '资源', dataIndex: 'resource', key: 'resource', width: 120, ellipsis: true },
+    {
+      title: '资源',
+      dataIndex: 'resource',
+      key: 'resource',
+      minWidth: 220,
+      render: (v) =>
+        v ? <span style={{ wordBreak: 'break-all', display: 'block' }}>{v}</span> : '-',
+    },
     { title: '详情', dataIndex: 'detail', key: 'detail', ellipsis: true },
     {
       title: '状态',

@@ -35,13 +35,18 @@ func main() {
 
 	log.Printf("Database initialized: %s", filepath.Join(dataDir, db.DBFileName))
 
-	// 启动时清理超过 3 个月的审计日志
+	// 审计日志：默认保留 3 个月，硬删除，避免数据过大影响性能
+	const auditRetentionMonths = 3
 	auditRepo := repository.NewAuditRepository()
-	if n, err := auditRepo.DeleteOlderThan(time.Now().AddDate(0, -3, 0)); err != nil {
-		log.Printf("Audit cleanup warning: %v", err)
+	auditCutoff := time.Now().AddDate(0, -auditRetentionMonths, 0)
+	if n, err := auditRepo.DeleteOlderThan(auditCutoff); err != nil {
+		log.Printf("[Audit] startup cleanup warning: %v", err)
 	} else if n > 0 {
-		log.Printf("Audit cleanup: removed %d old entries", n)
+		log.Printf("[Audit] startup cleanup: removed %d entries older than %d months", n, auditRetentionMonths)
 	}
+
+	// 定时任务：每日午夜执行审计日志巡检（删除超过 3 个月的记录）
+	go runAuditDailyCleanup(auditRepo, auditRetentionMonths)
 
 	// 从数据库加载配置
 	configRepo := repository.NewConfigRepository()
@@ -71,5 +76,25 @@ func main() {
 
 	if err := r.Run(addr); err != nil {
 		log.Fatal("Failed to start server:", err)
+	}
+}
+
+// runAuditDailyCleanup 每日午夜执行审计日志清理，仅保留 retentionMonths 个月内数据（硬删除）
+func runAuditDailyCleanup(auditRepo repository.AuditRepository, retentionMonths int) {
+	for {
+		now := time.Now()
+		next := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
+		d := time.Until(next)
+		if d < 0 {
+			d = 0
+		}
+		time.Sleep(d)
+		cutoff := time.Now().AddDate(0, -retentionMonths, 0)
+		n, err := auditRepo.DeleteOlderThan(cutoff)
+		if err != nil {
+			log.Printf("[Audit] daily cleanup error: %v", err)
+		} else if n > 0 {
+			log.Printf("[Audit] daily cleanup: removed %d entries older than %d months", n, retentionMonths)
+		}
 	}
 }
