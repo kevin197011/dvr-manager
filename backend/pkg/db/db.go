@@ -89,9 +89,23 @@ func createTables() error {
 			server TEXT UNIQUE NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
+		// 审计日志表（仅保留 3 个月）
+		`CREATE TABLE IF NOT EXISTS audit_log (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			action TEXT NOT NULL,
+			username TEXT,
+			role TEXT,
+			client_ip TEXT,
+			resource TEXT,
+			detail TEXT,
+			status TEXT
+		)`,
 		// 创建索引
 		`CREATE INDEX IF NOT EXISTS idx_config_key ON config(key)`,
 		`CREATE INDEX IF NOT EXISTS idx_dvr_servers_server ON dvr_servers(server)`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at)`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action)`,
 	}
 
 	for _, query := range queries {

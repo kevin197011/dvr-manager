@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"dvr-vod-system/internal/repository"
 	"dvr-vod-system/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +15,14 @@ import (
 // AdminHandler 管理后台处理器
 type AdminHandler struct {
 	configService service.ConfigService
+	auditRepo     repository.AuditRepository
 }
 
 // NewAdminHandler 创建新的管理后台处理器
-func NewAdminHandler(configService service.ConfigService) *AdminHandler {
+func NewAdminHandler(configService service.ConfigService, auditRepo repository.AuditRepository) *AdminHandler {
 	return &AdminHandler{
 		configService: configService,
+		auditRepo:     auditRepo,
 	}
 }
 
@@ -83,6 +87,13 @@ func (h *AdminHandler) UpdateDVRServers(c *gin.Context) {
 		return
 	}
 
+	if h.auditRepo != nil {
+		username, _ := c.Get("username")
+		userStr, _ := username.(string)
+		role, _ := c.Get("role")
+		roleStr, _ := role.(string)
+		_ = h.auditRepo.Insert("config_save", userStr, roleStr, c.ClientIP(), "dvr_servers", fmt.Sprintf("更新 DVR 服务器 %d 个", len(req.Servers)), "success")
+	}
 	log.Printf("[INFO] DVR 服务器列表已更新 - IP: %s, 数量: %d", c.ClientIP(), len(req.Servers))
 	c.JSON(http.StatusOK, UpdateDVRServersResponse{
 		Success: true,
@@ -182,6 +193,13 @@ func (h *AdminHandler) UpdateConfig(c *gin.Context) {
 		return
 	}
 
+	if h.auditRepo != nil {
+		username, _ := c.Get("username")
+		userStr, _ := username.(string)
+		role, _ := c.Get("role")
+		roleStr, _ := role.(string)
+		_ = h.auditRepo.Insert("config_save", userStr, roleStr, c.ClientIP(), "config", "保存完整配置", "success")
+	}
 	log.Printf("[INFO] 配置已更新 - IP: %s", c.ClientIP())
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -199,7 +217,13 @@ func (h *AdminHandler) ReloadConfig(c *gin.Context) {
 		})
 		return
 	}
-
+	if h.auditRepo != nil {
+		username, _ := c.Get("username")
+		userStr, _ := username.(string)
+		role, _ := c.Get("role")
+		roleStr, _ := role.(string)
+		_ = h.auditRepo.Insert("config_reload", userStr, roleStr, c.ClientIP(), "", "重新加载配置", "success")
+	}
 	log.Printf("[INFO] 配置已重新加载 - IP: %s", c.ClientIP())
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

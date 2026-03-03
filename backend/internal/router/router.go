@@ -29,6 +29,7 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	// 初始化仓库
 	configRepo := repository.NewConfigRepository()
 	dvrRepo := repository.NewDVRRepository()
+	auditRepo := repository.NewAuditRepository()
 
 	// 初始化服务
 	cacheInstance := cache.NewMemoryCache()
@@ -37,16 +38,17 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	configService := service.NewConfigService(configRepo, dvrRepo)
 	authService := service.NewAuthService()
 
+	// JWT Secret（从环境变量读取，默认使用固定值）
+	jwtSecret := os.Getenv("JWT_SECRET")
+	authHandler := handler.NewAuthHandler(authService, jwtSecret, auditRepo)
+
 	// 初始化处理器
-	playHandler := handler.NewPlayHandler(dvrService, cacheInstance)
+	playHandler := handler.NewPlayHandler(dvrService, cacheInstance, auditRepo)
 	proxyHandler := handler.NewProxyHandler(proxyService, cacheInstance)
 	configHandler := handler.NewConfigHandler(cfg)
 	healthHandler := handler.NewHealthHandler(cfg)
-	adminHandler := handler.NewAdminHandler(configService)
-	
-	// JWT Secret（从环境变量读取，默认使用固定值）
-	jwtSecret := os.Getenv("JWT_SECRET")
-	authHandler := handler.NewAuthHandler(authService, jwtSecret)
+	adminHandler := handler.NewAdminHandler(configService, auditRepo)
+	auditHandler := handler.NewAuditHandler(auditRepo)
 
 	// 认证路由（不需要认证）
 	auth := r.Group("/api/auth")
@@ -75,6 +77,8 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 		admin.GET("/dvr-servers", adminHandler.GetDVRServers)
 		admin.POST("/dvr-servers", adminHandler.UpdateDVRServers)
 		admin.POST("/reload", adminHandler.ReloadConfig)
+		admin.GET("/audit", auditHandler.GetAudit)
+		admin.POST("/audit/cleanup", auditHandler.Cleanup)
 	}
 
 	// 视频流代理路由

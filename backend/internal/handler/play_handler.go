@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"dvr-vod-system/internal/repository"
 	"dvr-vod-system/internal/service"
 	"dvr-vod-system/pkg/cache"
 
@@ -16,13 +17,15 @@ import (
 type PlayHandler struct {
 	dvrService service.DVRService
 	cache      cache.Cache
+	auditRepo  repository.AuditRepository
 }
 
 // NewPlayHandler 创建新的播放处理器
-func NewPlayHandler(dvrService service.DVRService, cache cache.Cache) *PlayHandler {
+func NewPlayHandler(dvrService service.DVRService, cache cache.Cache, auditRepo repository.AuditRepository) *PlayHandler {
 	return &PlayHandler{
 		dvrService: dvrService,
 		cache:      cache,
+		auditRepo:  auditRepo,
 	}
 }
 
@@ -96,9 +99,17 @@ func (h *PlayHandler) Handle(c *gin.Context) {
 	// 使用请求的上下文，每个请求独立互不干扰
 	ctx := c.Request.Context()
 
+	username, _ := c.Get("username")
+	userStr, _ := username.(string)
+	role, _ := c.Get("role")
+	roleStr, _ := role.(string)
+
 	// 查找录像
 	url, err := h.dvrService.FindRecording(ctx, req.RecordID)
 	if err != nil {
+		if h.auditRepo != nil {
+			_ = h.auditRepo.Insert("play", userStr, roleStr, c.ClientIP(), req.RecordID, "录像未找到", "fail")
+		}
 		log.Printf("[WARN] 录像未找到 - IP: %s, 编号: %s", c.ClientIP(), req.RecordID)
 		c.JSON(http.StatusNotFound, PlayResponse{
 			Success: false,
@@ -113,6 +124,9 @@ func (h *PlayHandler) Handle(c *gin.Context) {
 	// 缓存真实 URL 映射
 	h.cache.Set(req.RecordID, url)
 
+	if h.auditRepo != nil {
+		_ = h.auditRepo.Insert("play", userStr, roleStr, c.ClientIP(), req.RecordID, "录像已找到", "success")
+	}
 	log.Printf("[SUCCESS] 录像找到 - IP: %s, 编号: %s", c.ClientIP(), req.RecordID)
 	c.JSON(http.StatusOK, PlayResponse{
 		Success:  true,
@@ -165,6 +179,14 @@ func (h *PlayHandler) HandleBatch(c *gin.Context, recordIDs []string) {
 	}
 
 	duration := time.Since(startTime)
+	username, _ := c.Get("username")
+	userStr, _ := username.(string)
+	role, _ := c.Get("role")
+	roleStr, _ := role.(string)
+	if h.auditRepo != nil {
+		detail := fmt.Sprintf("批量查询 %d 条，找到 %d 条", len(recordIDs), foundCount)
+		_ = h.auditRepo.Insert("play_batch", userStr, roleStr, c.ClientIP(), "", detail, "success")
+	}
 	log.Printf("[INFO] 批量查询完成 - IP: %s, 总数: %d, 找到: %d, 耗时: %v",
 		c.ClientIP(), len(recordIDs), foundCount, duration)
 

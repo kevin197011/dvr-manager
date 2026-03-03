@@ -105,6 +105,14 @@ export const adminService = {
   reloadConfig: async () => {
     return await api.post('/admin/reload');
   },
+
+  /**
+   * 获取审计日志（管理员）
+   * @param {Object} params - from, to (RFC3339), action, username, page, page_size
+   */
+  getAuditLogs: async (params = {}) => {
+    return await api.get('/admin/audit', { params });
+  },
 };
 
 export default api;

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"dvr-vod-system/internal/config"
 	"dvr-vod-system/internal/repository"
@@ -33,6 +34,14 @@ func main() {
 	defer db.Close()
 
 	log.Printf("Database initialized: %s", filepath.Join(dataDir, db.DBFileName))
+
+	// 启动时清理超过 3 个月的审计日志
+	auditRepo := repository.NewAuditRepository()
+	if n, err := auditRepo.DeleteOlderThan(time.Now().AddDate(0, -3, 0)); err != nil {
+		log.Printf("Audit cleanup warning: %v", err)
+	} else if n > 0 {
+		log.Printf("Audit cleanup: removed %d old entries", n)
+	}
 
 	// 从数据库加载配置
 	configRepo := repository.NewConfigRepository()

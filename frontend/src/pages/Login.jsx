@@ -29,52 +29,66 @@ function Login() {
 
   return (
     <div className="login-container">
-      <div className="login-background">
-        {/* 视频流网格背景 */}
+      <div className="login-background" aria-hidden="true">
+        {/* 点播底图：渐变 + 网格 */}
         <div className="login-video-grid"></div>
-        
-        {/* 视频波形效果（模拟视频信号波形） */}
+
+        {/* 胶片帧条：模拟视频帧流动（双份实现无缝循环） */}
+        <div className="login-film-strip">
+          {[...Array(16)].map((_, i) => (
+            <div key={i} className="login-film-frame" />
+          ))}
+          {[...Array(16)].map((_, i) => (
+            <div key={`dup-${i}`} className="login-film-frame" />
+          ))}
+        </div>
+
+        {/* 波形：模拟音视频电平 */}
         <div className="login-video-waveform">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="login-waveform-bar" style={{
-              left: `${10 + i * 18}%`,
-              animationDelay: `${i * 0.15}s`,
-            }}></div>
+          {[...Array(7)].map((_, i) => (
+            <div key={i} className="login-waveform-bar" style={{ animationDelay: `${i * 0.1}s` }} />
           ))}
         </div>
-        
-        {/* 视频流数据包效果 */}
+
+        {/* 流式数据点（点播数据包） */}
         <div className="login-video-packets">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="login-packet" style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${4 + Math.random() * 3}s`,
-            }}></div>
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={i}
+              className="login-packet"
+              style={{
+                left: `${5 + (i % 5) * 22}%`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${5 + (i % 4)}s`,
+              }}
+            />
           ))}
         </div>
-        
-        {/* 视频播放进度指示 */}
+
+        {/* 播放进度条 */}
         <div className="login-video-progress">
-          <div className="login-progress-bar"></div>
+          <div className="login-progress-bar" />
         </div>
-        
-        {/* 视频信号连接点 */}
+
+        {/* 节点：DVR/流媒体节点 */}
         <div className="login-video-nodes">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="login-node" style={{
-              left: `${15 + (i % 3) * 35}%`,
-              top: `${20 + Math.floor(i / 3) * 50}%`,
-              animationDelay: `${i * 0.3}s`,
-            }}>
-              <div className="login-node-pulse"></div>
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className="login-node"
+              style={{
+                left: `${12 + (i % 3) * 38}%`,
+                top: `${18 + Math.floor(i / 3) * 55}%`,
+                animationDelay: `${i * 0.25}s`,
+              }}
+            >
+              <div className="login-node-pulse" />
             </div>
           ))}
         </div>
-        
-        {/* 视频流扫描线 */}
-        <div className="login-video-scanline"></div>
+
+        {/* 扫描线（CRT/流式感） */}
+        <div className="login-video-scanline" />
       </div>
       <div className="login-wrapper">
         <div className="login-header">

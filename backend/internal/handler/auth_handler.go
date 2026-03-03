@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"dvr-vod-system/internal/repository"
 	"dvr-vod-system/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -16,16 +17,18 @@ import (
 type AuthHandler struct {
 	authService service.AuthService
 	jwtSecret   []byte
+	auditRepo   repository.AuditRepository
 }
 
 // NewAuthHandler 创建新的认证处理器
-func NewAuthHandler(authService service.AuthService, jwtSecret string) *AuthHandler {
+func NewAuthHandler(authService service.AuthService, jwtSecret string, auditRepo repository.AuditRepository) *AuthHandler {
 	if jwtSecret == "" {
 		jwtSecret = "dvr-vod-system-secret-key-change-in-production"
 	}
 	return &AuthHandler{
 		authService: authService,
 		jwtSecret:   []byte(jwtSecret),
+		auditRepo:   auditRepo,
 	}
 }
 
@@ -80,6 +83,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// 验证用户名和密码
 	user, err := h.authService.Authenticate(req.Username, req.Password)
 	if err != nil {
+		if h.auditRepo != nil {
+			_ = h.auditRepo.Insert("login_fail", req.Username, "", clientIP, "", "登录失败", "fail")
+		}
 		log.Printf("[AUTH] 登录失败 - IP: %s, 用户名: %s, Error: %v", clientIP, req.Username, err)
 		c.JSON(http.StatusUnauthorized, LoginResponse{
 			Success: false,
@@ -99,6 +105,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	if h.auditRepo != nil {
+		_ = h.auditRepo.Insert("login_success", user.Username, user.Role, clientIP, "", "登录成功", "success")
+	}
 	log.Printf("[AUTH] 登录成功 - IP: %s, 用户名: %s, 角色: %s", clientIP, user.Username, user.Role)
 	c.JSON(http.StatusOK, LoginResponse{
 		Success: true,

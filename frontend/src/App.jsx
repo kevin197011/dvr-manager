@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
+import Audit from './pages/Audit';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 
@@ -25,6 +26,14 @@ function App() {
             element={
               <AdminRoute>
                 <Admin />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/audit"
+            element={
+              <AdminRoute>
+                <Audit />
               </AdminRoute>
             }
           />

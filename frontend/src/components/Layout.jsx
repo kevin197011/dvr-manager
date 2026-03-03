@@ -8,6 +8,7 @@ import {
   UserOutlined,
   VideoCameraOutlined,
   BulbOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
@@ -36,6 +37,11 @@ function Layout() {
             key: '/admin',
             icon: <SettingOutlined />,
             label: '系统管理',
+          },
+          {
+            key: '/admin/audit',
+            icon: <AuditOutlined />,
+            label: '审计查询',
           },
         ]
       : []),
