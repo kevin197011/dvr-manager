@@ -86,9 +86,6 @@ function Login() {
             </div>
           ))}
         </div>
-
-        {/* 扫描线（CRT/流式感） */}
-        <div className="login-video-scanline" />
       </div>
       <div className="login-wrapper">
         <div className="login-header">

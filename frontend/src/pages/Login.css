@@ -295,37 +295,6 @@
   }
 }
 
-/* 扫描线（CRT/流式感） */
-.login-video-scanline {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(59, 130, 246, 0.4),
-    rgba(59, 130, 246, 0.75),
-    rgba(59, 130, 246, 0.4),
-    transparent
-  );
-  animation: videoScanlineMove 4.5s linear infinite;
-  box-shadow: 0 0 16px rgba(59, 130, 246, 0.5);
-  opacity: 0.7;
-}
-
-[data-theme='dark'] .login-video-scanline {
-  opacity: 0.9;
-}
-
-@keyframes videoScanlineMove {
-  0% { top: -2px; opacity: 0; }
-  3% { opacity: 1; }
-  97% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
-}
-
 .login-wrapper {
   width: 100%;
   max-width: 420px;
@@ -577,7 +546,6 @@
   .login-progress-bar,
   .login-node-pulse,
   .login-node::before,
-  .login-video-scanline,
   .login-wrapper::before {
     animation: none !important;
   }
@@ -585,8 +553,7 @@
   .login-film-strip,
   .login-video-waveform,
   .login-video-packets,
-  .login-video-nodes,
-  .login-video-scanline {
+  .login-video-nodes {
     opacity: 0.2 !important;
   }
 }
