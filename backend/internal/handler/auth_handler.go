@@ -40,10 +40,10 @@ type LoginRequest struct {
 
 // LoginResponse 登录响应
 type LoginResponse struct {
-	Success bool   `json:"success"`
-	Token   string `json:"token,omitempty"`
+	Success bool     `json:"success"`
+	Token   string   `json:"token,omitempty"`
 	User    UserInfo `json:"user,omitempty"`
-	Message string `json:"message,omitempty"`
+	Message string   `json:"message,omitempty"`
 }
 
 // UserInfo 用户信息
@@ -149,6 +149,43 @@ func (h *AuthHandler) Me(c *gin.Context) {
 			Role:     claims.Role,
 		},
 	})
+}
+
+// ChangePasswordRequest 修改密码请求
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required,min=6"`
+}
+
+// ChangePassword 当前登录用户修改自己的密码
+func (h *AuthHandler) ChangePassword(c *gin.Context) {
+	clientIP := c.ClientIP()
+	usernameVal, _ := c.Get("username")
+	username, _ := usernameVal.(string)
+	if username == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "未登录"})
+		return
+	}
+
+	var req ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "请求参数错误"})
+		return
+	}
+
+	if err := h.authService.ChangePassword(username, req.OldPassword, req.NewPassword); err != nil {
+		if h.auditRepo != nil {
+			_ = h.auditRepo.Insert("password_change", username, "", clientIP, "", err.Error(), "fail")
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+
+	if h.auditRepo != nil {
+		_ = h.auditRepo.Insert("password_change", username, "", clientIP, "", "修改自己的密码", "success")
+	}
+	log.Printf("[AUTH] 密码修改成功 - IP: %s, 用户名: %s", clientIP, username)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "密码修改成功"})
 }
 
 // Logout 处理登出请求

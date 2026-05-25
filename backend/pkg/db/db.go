@@ -101,11 +101,21 @@ func createTables() error {
 			detail TEXT,
 			status TEXT
 		)`,
+		// 用户表（密码使用 bcrypt 哈希存储）
+		`CREATE TABLE IF NOT EXISTS users (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			username TEXT UNIQUE NOT NULL,
+			password_hash TEXT NOT NULL,
+			role TEXT NOT NULL DEFAULT 'user',
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
 		// 创建索引
 		`CREATE INDEX IF NOT EXISTS idx_config_key ON config(key)`,
 		`CREATE INDEX IF NOT EXISTS idx_dvr_servers_server ON dvr_servers(server)`,
 		`CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at)`,
 		`CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action)`,
+		`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
 	}
 
 	for _, query := range queries {

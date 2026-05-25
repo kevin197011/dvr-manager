@@ -1,17 +1,30 @@
 import { useState } from 'react';
-import { Layout as AntLayout, Menu, Avatar, Dropdown, Space, Switch } from 'antd';
+import {
+  Layout as AntLayout,
+  Menu,
+  Avatar,
+  Dropdown,
+  Space,
+  Switch,
+  Modal,
+  Form,
+  Input,
+  message,
+} from 'antd';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
-  HomeOutlined,
   SettingOutlined,
   LogoutOutlined,
   UserOutlined,
   VideoCameraOutlined,
   BulbOutlined,
   AuditOutlined,
+  TeamOutlined,
+  KeyOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
+import { authService } from '../services/authService';
 import './Layout.css';
 
 const { Header, Sider, Content, Footer } = AntLayout;
@@ -22,6 +35,9 @@ function Layout() {
   const location = useLocation();
   const { user, logout } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
+  const [pwdOpen, setPwdOpen] = useState(false);
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdForm] = Form.useForm();
 
   // 根据用户角色显示菜单
   const menuItems = [
@@ -39,6 +55,11 @@ function Layout() {
             label: '系统管理',
           },
           {
+            key: '/admin/users',
+            icon: <TeamOutlined />,
+            label: '用户管理',
+          },
+          {
             key: '/admin/audit',
             icon: <AuditOutlined />,
             label: '审计查询',
@@ -49,9 +70,9 @@ function Layout() {
 
   const userMenuItems = [
     {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: '个人信息',
+      key: 'change-password',
+      icon: <KeyOutlined />,
+      label: '修改密码',
     },
     {
       type: 'divider',
@@ -68,10 +89,36 @@ function Layout() {
     if (key === 'logout') {
       logout();
       navigate('/login');
-    } else if (key === 'profile') {
-      // TODO: 个人信息页面
+    } else if (key === 'change-password') {
+      pwdForm.resetFields();
+      setPwdOpen(true);
     } else {
       navigate(key);
+    }
+  };
+
+  const onChangePassword = async () => {
+    try {
+      const values = await pwdForm.validateFields();
+      if (values.new_password !== values.confirm_password) {
+        message.error('两次输入的新密码不一致');
+        return;
+      }
+      setPwdLoading(true);
+      const res = await authService.changePassword(values.old_password, values.new_password);
+      if (res?.success) {
+        message.success('密码修改成功，请重新登录');
+        setPwdOpen(false);
+        logout();
+        navigate('/login');
+      } else {
+        message.error(res?.message || '修改失败');
+      }
+    } catch (err) {
+      if (err?.errorFields) return;
+      message.error(err?.response?.data?.message || '修改失败');
+    } finally {
+      setPwdLoading(false);
     }
   };
 
@@ -149,6 +196,55 @@ function Layout() {
           <div>系统运行部驱动</div>
         </Footer>
       </AntLayout>
+
+      <Modal
+        title="修改密码"
+        open={pwdOpen}
+        onOk={onChangePassword}
+        onCancel={() => setPwdOpen(false)}
+        confirmLoading={pwdLoading}
+        okText="确定"
+        cancelText="取消"
+        destroyOnClose
+      >
+        <Form form={pwdForm} layout="vertical" autoComplete="off">
+          <Form.Item
+            name="old_password"
+            label="原密码"
+            rules={[{ required: true, message: '请输入原密码' }]}
+          >
+            <Input.Password autoComplete="current-password" />
+          </Form.Item>
+          <Form.Item
+            name="new_password"
+            label="新密码"
+            rules={[
+              { required: true, message: '请输入新密码' },
+              { min: 6, message: '密码长度至少 6 位' },
+            ]}
+          >
+            <Input.Password autoComplete="new-password" />
+          </Form.Item>
+          <Form.Item
+            name="confirm_password"
+            label="确认新密码"
+            dependencies={['new_password']}
+            rules={[
+              { required: true, message: '请再次输入新密码' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('new_password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('两次输入的新密码不一致'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password autoComplete="new-password" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </AntLayout>
   );
 }

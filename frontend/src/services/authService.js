@@ -69,6 +69,13 @@ export const authService = {
   logout: async () => {
     await api.post('/auth/logout');
   },
+
+  changePassword: async (oldPassword, newPassword) => {
+    return await api.post('/auth/change-password', {
+      old_password: oldPassword,
+      new_password: newPassword,
+    });
+  },
 };
 
 export const dvrService = {
@@ -112,6 +119,33 @@ export const adminService = {
    */
   getAuditLogs: async (params = {}) => {
     return await api.get('/admin/audit', { params });
+  },
+
+  /** 列出所有用户 */
+  listUsers: async () => {
+    return await api.get('/admin/users');
+  },
+
+  /** 创建用户 */
+  createUser: async ({ username, password, role }) => {
+    return await api.post('/admin/users', { username, password, role });
+  },
+
+  /** 修改用户角色 */
+  updateUserRole: async (id, role) => {
+    return await api.put(`/admin/users/${id}/role`, { role });
+  },
+
+  /** 管理员重置用户密码 */
+  resetUserPassword: async (id, newPassword) => {
+    return await api.post(`/admin/users/${id}/reset-password`, {
+      new_password: newPassword,
+    });
+  },
+
+  /** 删除用户 */
+  deleteUser: async (id) => {
+    return await api.delete(`/admin/users/${id}`);
   },
 };
 

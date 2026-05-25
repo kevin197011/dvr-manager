@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
 import Audit from './pages/Audit';
+import Users from './pages/Users';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 
@@ -34,6 +35,14 @@ function App() {
             element={
               <AdminRoute>
                 <Audit />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/users"
+            element={
+              <AdminRoute>
+                <Users />
               </AdminRoute>
             }
           />

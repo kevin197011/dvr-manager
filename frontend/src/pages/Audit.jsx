@@ -33,10 +33,15 @@ const ACTION_OPTIONS = [
   { value: '', label: '全部' },
   { value: 'login_success', label: '登录成功' },
   { value: 'login_fail', label: '登录失败' },
+  { value: 'password_change', label: '修改密码' },
   { value: 'play', label: '播放' },
   { value: 'play_batch', label: '批量播放' },
   { value: 'config_save', label: '保存配置' },
   { value: 'config_reload', label: '重新加载配置' },
+  { value: 'user_create', label: '新增用户' },
+  { value: 'user_update_role', label: '修改用户角色' },
+  { value: 'user_reset_password', label: '重置用户密码' },
+  { value: 'user_delete', label: '删除用户' },
 ];
 
 function Audit() {

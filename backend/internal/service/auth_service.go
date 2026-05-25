@@ -2,31 +2,60 @@ package service
 
 import (
 	"errors"
+	"log"
 	"os"
+	"strings"
+
+	"dvr-vod-system/internal/repository"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
-// User 用户模型
+// User 用户模型（对外返回，不包含密码）
 type User struct {
-	Username string
-	Password string
-	Role     string
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
 }
 
 // AuthService 认证服务接口
 type AuthService interface {
 	Authenticate(username, password string) (*User, error)
 	GetUser(username string) (*User, error)
+	ChangePassword(username, oldPassword, newPassword string) error
+
+	// 管理员接口
+	ListUsers() ([]User, error)
+	CreateUser(username, password, role string) (*User, error)
+	ResetPassword(id int64, newPassword string) error
+	UpdateUserRole(id int64, role string) error
+	DeleteUser(id int64) error
+	GetUserByID(id int64) (*User, error)
 }
 
-// authService 认证服务实现
 type authService struct {
-	users map[string]*User
+	repo repository.UserRepository
 }
 
-// NewAuthService 创建新的认证服务
-func NewAuthService() AuthService {
-	// 从环境变量读取默认管理员账号
-	adminUsername := os.Getenv("ADMIN_USERNAME")
+// NewAuthService 创建认证服务（数据库存储 + bcrypt）
+func NewAuthService(repo repository.UserRepository) AuthService {
+	s := &authService{repo: repo}
+	s.seedDefaultUsers()
+	return s
+}
+
+// seedDefaultUsers 在用户表为空时，使用环境变量创建默认账号
+func (s *authService) seedDefaultUsers() {
+	count, err := s.repo.Count()
+	if err != nil {
+		log.Printf("[AUTH] count users error: %v", err)
+		return
+	}
+	if count > 0 {
+		return
+	}
+
+	adminUsername := strings.TrimSpace(os.Getenv("ADMIN_USERNAME"))
 	if adminUsername == "" {
 		adminUsername = "admin"
 	}
@@ -35,8 +64,7 @@ func NewAuthService() AuthService {
 		adminPassword = "admin123"
 	}
 
-	// 从环境变量读取默认普通用户账号
-	userUsername := os.Getenv("USER_USERNAME")
+	userUsername := strings.TrimSpace(os.Getenv("USER_USERNAME"))
 	if userUsername == "" {
 		userUsername = "user"
 	}
@@ -45,43 +73,159 @@ func NewAuthService() AuthService {
 		userPassword = "user123"
 	}
 
-	users := map[string]*User{
-		adminUsername: {
-			Username: adminUsername,
-			Password: adminPassword,
-			Role:     "admin",
-		},
-		userUsername: {
-			Username: userUsername,
-			Password: userPassword,
-			Role:     "user",
-		},
+	if _, err := s.CreateUser(adminUsername, adminPassword, "admin"); err != nil {
+		log.Printf("[AUTH] seed admin failed: %v", err)
+	} else {
+		log.Printf("[AUTH] seeded default admin user: %s", adminUsername)
 	}
-
-	return &authService{
-		users: users,
+	if userUsername != adminUsername {
+		if _, err := s.CreateUser(userUsername, userPassword, "user"); err != nil {
+			log.Printf("[AUTH] seed user failed: %v", err)
+		} else {
+			log.Printf("[AUTH] seeded default normal user: %s", userUsername)
+		}
 	}
 }
 
-// Authenticate 验证用户名和密码
+func hashPassword(p string) (string, error) {
+	h, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(h), nil
+}
+
+func toUser(u *repository.User) *User {
+	if u == nil {
+		return nil
+	}
+	return &User{ID: u.ID, Username: u.Username, Role: u.Role}
+}
+
+// Authenticate 验证用户名密码
 func (s *authService) Authenticate(username, password string) (*User, error) {
-	user, exists := s.users[username]
-	if !exists {
-		return nil, errors.New("用户不存在")
+	u, err := s.repo.GetByUsername(username)
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return nil, errors.New("用户名或密码错误")
+		}
+		return nil, err
 	}
-
-	if user.Password != password {
-		return nil, errors.New("密码错误")
+	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password)); err != nil {
+		return nil, errors.New("用户名或密码错误")
 	}
-
-	return user, nil
+	return toUser(u), nil
 }
 
-// GetUser 获取用户信息
+// GetUser 获取用户
 func (s *authService) GetUser(username string) (*User, error) {
-	user, exists := s.users[username]
-	if !exists {
-		return nil, errors.New("用户不存在")
+	u, err := s.repo.GetByUsername(username)
+	if err != nil {
+		return nil, err
 	}
-	return user, nil
+	return toUser(u), nil
+}
+
+// GetUserByID 根据 ID 获取
+func (s *authService) GetUserByID(id int64) (*User, error) {
+	u, err := s.repo.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return toUser(u), nil
+}
+
+// ChangePassword 修改自己的密码（需校验旧密码）
+func (s *authService) ChangePassword(username, oldPassword, newPassword string) error {
+	if len(newPassword) < 6 {
+		return errors.New("新密码长度至少 6 位")
+	}
+	u, err := s.repo.GetByUsername(username)
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return errors.New("用户不存在")
+		}
+		return err
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(oldPassword)); err != nil {
+		return errors.New("原密码错误")
+	}
+	if oldPassword == newPassword {
+		return errors.New("新密码与原密码相同")
+	}
+	hash, err := hashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+	return s.repo.UpdatePassword(u.ID, hash)
+}
+
+// ListUsers 用户列表
+func (s *authService) ListUsers() ([]User, error) {
+	list, err := s.repo.List()
+	if err != nil {
+		return nil, err
+	}
+	out := make([]User, 0, len(list))
+	for i := range list {
+		out = append(out, *toUser(&list[i]))
+	}
+	return out, nil
+}
+
+// CreateUser 新增用户
+func (s *authService) CreateUser(username, password, role string) (*User, error) {
+	username = strings.TrimSpace(username)
+	if username == "" {
+		return nil, errors.New("用户名不能为空")
+	}
+	if len(password) < 6 {
+		return nil, errors.New("密码长度至少 6 位")
+	}
+	if role != "admin" && role != "user" {
+		return nil, errors.New("角色必须为 admin 或 user")
+	}
+	hash, err := hashPassword(password)
+	if err != nil {
+		return nil, err
+	}
+	u, err := s.repo.Create(username, hash, role)
+	if err != nil {
+		return nil, err
+	}
+	return toUser(u), nil
+}
+
+// ResetPassword 管理员重置某个用户的密码
+func (s *authService) ResetPassword(id int64, newPassword string) error {
+	if len(newPassword) < 6 {
+		return errors.New("新密码长度至少 6 位")
+	}
+	if _, err := s.repo.GetByID(id); err != nil {
+		return err
+	}
+	hash, err := hashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+	return s.repo.UpdatePassword(id, hash)
+}
+
+// UpdateUserRole 修改用户角色
+func (s *authService) UpdateUserRole(id int64, role string) error {
+	if role != "admin" && role != "user" {
+		return errors.New("角色必须为 admin 或 user")
+	}
+	if _, err := s.repo.GetByID(id); err != nil {
+		return err
+	}
+	return s.repo.UpdateRole(id, role)
+}
+
+// DeleteUser 删除用户
+func (s *authService) DeleteUser(id int64) error {
+	if _, err := s.repo.GetByID(id); err != nil {
+		return err
+	}
+	return s.repo.Delete(id)
 }

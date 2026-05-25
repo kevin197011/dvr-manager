@@ -30,13 +30,14 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	configRepo := repository.NewConfigRepository()
 	dvrRepo := repository.NewDVRRepository()
 	auditRepo := repository.NewAuditRepository()
+	userRepo := repository.NewUserRepository()
 
 	// 初始化服务
 	cacheInstance := cache.NewMemoryCache()
 	dvrService := service.NewDVRService(cfg, dvrRepo)
 	proxyService := service.NewProxyService(cfg)
 	configService := service.NewConfigService(configRepo, dvrRepo)
-	authService := service.NewAuthService()
+	authService := service.NewAuthService(userRepo)
 
 	// JWT Secret（从环境变量读取，默认使用固定值）
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -49,6 +50,7 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	healthHandler := handler.NewHealthHandler(cfg)
 	adminHandler := handler.NewAdminHandler(configService, auditRepo)
 	auditHandler := handler.NewAuditHandler(auditRepo)
+	userHandler := handler.NewUserHandler(authService, auditRepo)
 
 	// 认证路由（不需要认证）
 	auth := r.Group("/api/auth")
@@ -56,6 +58,13 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 		auth.POST("/login", authHandler.Login)
 		auth.GET("/me", authHandler.Me)
 		auth.POST("/logout", authHandler.Logout)
+	}
+
+	// 需要登录的认证相关路由
+	authProtected := r.Group("/api/auth")
+	authProtected.Use(middleware.AuthMiddleware(authHandler))
+	{
+		authProtected.POST("/change-password", authHandler.ChangePassword)
 	}
 
 	// API 路由（可选认证，用于公开访问）
@@ -79,6 +88,13 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 		admin.POST("/reload", adminHandler.ReloadConfig)
 		admin.GET("/audit", auditHandler.GetAudit)
 		admin.POST("/audit/cleanup", auditHandler.Cleanup)
+
+		// 用户管理
+		admin.GET("/users", userHandler.List)
+		admin.POST("/users", userHandler.Create)
+		admin.PUT("/users/:id/role", userHandler.UpdateRole)
+		admin.POST("/users/:id/reset-password", userHandler.ResetPassword)
+		admin.DELETE("/users/:id", userHandler.Delete)
 	}
 
 	// 视频流代理路由
