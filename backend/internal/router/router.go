@@ -45,7 +45,7 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 
 	// 初始化处理器
 	playHandler := handler.NewPlayHandler(dvrService, cacheInstance, auditRepo)
-	proxyHandler := handler.NewProxyHandler(proxyService, cacheInstance)
+	proxyHandler := handler.NewProxyHandler(proxyService, dvrService, cacheInstance, auditRepo)
 	configHandler := handler.NewConfigHandler(cfg)
 	healthHandler := handler.NewHealthHandler(cfg)
 	adminHandler := handler.NewAdminHandler(configService, auditRepo)
@@ -97,8 +97,12 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 		admin.DELETE("/users/:id", userHandler.Delete)
 	}
 
-	// 视频流代理路由
-	r.GET("/stream/:filename", proxyHandler.Handle)
+	// 视频流代理路由（可选认证，仅用于在审计日志中记录登录用户）
+	stream := r.Group("/stream")
+	stream.Use(middleware.OptionalAuthMiddleware(authHandler))
+	{
+		stream.GET("/:filename", proxyHandler.Handle)
+	}
 
 	// 健康检查（支持 GET 和 HEAD）
 	r.GET("/health", healthHandler.Handle)
