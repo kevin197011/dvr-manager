@@ -16,6 +16,7 @@ type User struct {
 	ID       int64  `json:"id"`
 	Username string `json:"username"`
 	Role     string `json:"role"`
+	Source   string `json:"source"`
 }
 
 // AuthService 认证服务接口
@@ -23,6 +24,9 @@ type AuthService interface {
 	Authenticate(username, password string) (*User, error)
 	GetUser(username string) (*User, error)
 	ChangePassword(username, oldPassword, newPassword string) error
+
+	// SSO 登录使用：根据 (username, source) 查找用户，不存在则自动创建 (role=user)
+	FindOrCreateSSOUser(username, source string) (*User, error)
 
 	// 管理员接口
 	ListUsers() ([]User, error)
@@ -99,10 +103,10 @@ func toUser(u *repository.User) *User {
 	if u == nil {
 		return nil
 	}
-	return &User{ID: u.ID, Username: u.Username, Role: u.Role}
+	return &User{ID: u.ID, Username: u.Username, Role: u.Role, Source: u.Source}
 }
 
-// Authenticate 验证用户名密码
+// Authenticate 验证用户名密码（仅本地用户）
 func (s *authService) Authenticate(username, password string) (*User, error) {
 	u, err := s.repo.GetByUsername(username)
 	if err != nil {
@@ -111,10 +115,37 @@ func (s *authService) Authenticate(username, password string) (*User, error) {
 		}
 		return nil, err
 	}
+	// SSO 用户禁止本地密码登录
+	if u.Source != "" && u.Source != "local" {
+		return nil, errors.New("该账号通过 SSO 登录，无法使用密码登录")
+	}
 	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password)); err != nil {
 		return nil, errors.New("用户名或密码错误")
 	}
 	return toUser(u), nil
+}
+
+// FindOrCreateSSOUser SSO 登录入口：按用户名查找；不存在则以默认角色 user 创建
+func (s *authService) FindOrCreateSSOUser(username, source string) (*User, error) {
+	username = strings.TrimSpace(username)
+	if username == "" {
+		return nil, errors.New("SSO 用户名为空")
+	}
+	if source == "" {
+		source = "sso"
+	}
+	u, err := s.repo.GetByUsername(username)
+	if err == nil {
+		return toUser(u), nil
+	}
+	if !errors.Is(err, repository.ErrUserNotFound) {
+		return nil, err
+	}
+	created, err := s.repo.CreateSSO(username, "user", source)
+	if err != nil {
+		return nil, err
+	}
+	return toUser(created), nil
 }
 
 // GetUser 获取用户

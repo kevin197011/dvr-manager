@@ -30,6 +30,11 @@ const useAuthStore = create(
           isAuthenticated: false,
         });
       },
+
+      // SSO 登录回调使用：直接以 token + user 写入状态
+      hydrate: ({ token, user }) => {
+        set({ token, user, isAuthenticated: !!token });
+      },
       
       checkAuth: async () => {
         const token = useAuthStore.getState().token;

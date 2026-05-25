@@ -5,6 +5,8 @@ import Home from './pages/Home';
 import Admin from './pages/Admin';
 import Audit from './pages/Audit';
 import Users from './pages/Users';
+import SsoConfig from './pages/SsoConfig';
+import SsoCallback from './pages/SsoCallback';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 
@@ -13,6 +15,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/sso-callback" element={<SsoCallback />} />
         <Route
           path="/"
           element={
@@ -43,6 +46,14 @@ function App() {
             element={
               <AdminRoute>
                 <Users />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/sso"
+            element={
+              <AdminRoute>
+                <SsoConfig />
               </AdminRoute>
             }
           />

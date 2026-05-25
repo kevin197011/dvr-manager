@@ -1,14 +1,34 @@
-import { useState } from 'react';
-import { Form, Input, Button, message } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import { Form, Input, Button, message, Divider, Space } from 'antd';
+import {
+  UserOutlined,
+  LockOutlined,
+  CloudOutlined,
+  SafetyOutlined,
+} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { authService } from '../services/authService';
 import './Login.css';
 
 function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuthStore();
+  const [ssoProviders, setSsoProviders] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await authService.listSSOProviders();
+        if (res?.success) {
+          setSsoProviders(res.providers || []);
+        }
+      } catch (e) {
+        // 静默失败，不影响本地登录
+      }
+    })();
+  }, []);
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -139,6 +159,32 @@ function Login() {
               </Button>
             </Form.Item>
           </Form>
+
+          {ssoProviders.length > 0 && (
+            <>
+              <Divider plain style={{ marginTop: 8 }}>
+                <span style={{ fontSize: 12, color: '#94A3B8' }}>或使用单点登录</span>
+              </Divider>
+              <Space direction="vertical" style={{ width: '100%' }}>
+                {ssoProviders.map((p) => {
+                  const Icon = p.type === 'oidc' ? CloudOutlined : SafetyOutlined;
+                  return (
+                    <Button
+                      key={`${p.type}-${p.id}`}
+                      block
+                      size="large"
+                      icon={<Icon />}
+                      onClick={() => {
+                        window.location.href = authService.ssoLoginURL(p);
+                      }}
+                    >
+                      使用 {p.name} 登录
+                    </Button>
+                  );
+                })}
+              </Space>
+            </>
+          )}
         </div>
       </div>
       <div className="login-footer">

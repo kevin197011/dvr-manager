@@ -101,25 +101,44 @@ func createTables() error {
 			detail TEXT,
 			status TEXT
 		)`,
-		// 用户表（密码使用 bcrypt 哈希存储）
+		// 用户表（密码使用 bcrypt 哈希存储；source 标记本地或 SSO 来源）
 		`CREATE TABLE IF NOT EXISTS users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			username TEXT UNIQUE NOT NULL,
 			password_hash TEXT NOT NULL,
 			role TEXT NOT NULL DEFAULT 'user',
+			source TEXT NOT NULL DEFAULT 'local',
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
+		// SSO 提供商配置表（OIDC / SAML），config_json 存储协议相关参数
+		`CREATE TABLE IF NOT EXISTS sso_providers (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			type TEXT NOT NULL,
+			name TEXT NOT NULL,
+			enabled INTEGER NOT NULL DEFAULT 1,
+			config_json TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+		// 兼容旧库：尝试为已存在的 users 表添加 source 列（已存在则忽略错误）
+		`ALTER TABLE users ADD COLUMN source TEXT NOT NULL DEFAULT 'local'`,
 		// 创建索引
 		`CREATE INDEX IF NOT EXISTS idx_config_key ON config(key)`,
 		`CREATE INDEX IF NOT EXISTS idx_dvr_servers_server ON dvr_servers(server)`,
 		`CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at)`,
 		`CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action)`,
 		`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
+		`CREATE INDEX IF NOT EXISTS idx_sso_providers_enabled ON sso_providers(enabled)`,
 	}
 
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
+			// ALTER TABLE 在列已存在时会失败，这里容错处理（不影响功能）
+			lower := query
+			if len(lower) >= 12 && lower[:12] == "ALTER TABLE " {
+				continue
+			}
 			return fmt.Errorf("failed to execute query: %w", err)
 		}
 	}

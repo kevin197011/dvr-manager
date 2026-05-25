@@ -21,6 +21,7 @@ import {
   AuditOutlined,
   TeamOutlined,
   KeyOutlined,
+  CloudOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
@@ -58,6 +59,11 @@ function Layout() {
             key: '/admin/users',
             icon: <TeamOutlined />,
             label: '用户管理',
+          },
+          {
+            key: '/admin/sso',
+            icon: <CloudOutlined />,
+            label: 'SSO 配置',
           },
           {
             key: '/admin/audit',

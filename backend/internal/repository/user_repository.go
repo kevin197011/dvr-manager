@@ -15,6 +15,7 @@ type User struct {
 	Username     string    `json:"username"`
 	PasswordHash string    `json:"-"`
 	Role         string    `json:"role"`
+	Source       string    `json:"source"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
@@ -31,6 +32,7 @@ type UserRepository interface {
 	GetByID(id int64) (*User, error)
 	List() ([]User, error)
 	Create(username, passwordHash, role string) (*User, error)
+	CreateSSO(username, role, source string) (*User, error)
 	UpdatePassword(id int64, passwordHash string) error
 	UpdateRole(id int64, role string) error
 	Delete(id int64) error
@@ -50,7 +52,7 @@ func (r *userRepository) scan(row interface {
 	Scan(dest ...interface{}) error
 }) (*User, error) {
 	var u User
-	if err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Role, &u.CreatedAt, &u.UpdatedAt); err != nil {
+	if err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Role, &u.Source, &u.CreatedAt, &u.UpdatedAt); err != nil {
 		return nil, err
 	}
 	return &u, nil
@@ -59,7 +61,7 @@ func (r *userRepository) scan(row interface {
 // GetByUsername 根据用户名查询
 func (r *userRepository) GetByUsername(username string) (*User, error) {
 	row := r.db.QueryRow(
-		`SELECT id, username, password_hash, role, created_at, updated_at FROM users WHERE username = ?`,
+		`SELECT id, username, password_hash, role, source, created_at, updated_at FROM users WHERE username = ?`,
 		username,
 	)
 	u, err := r.scan(row)
@@ -75,7 +77,7 @@ func (r *userRepository) GetByUsername(username string) (*User, error) {
 // GetByID 根据 ID 查询
 func (r *userRepository) GetByID(id int64) (*User, error) {
 	row := r.db.QueryRow(
-		`SELECT id, username, password_hash, role, created_at, updated_at FROM users WHERE id = ?`,
+		`SELECT id, username, password_hash, role, source, created_at, updated_at FROM users WHERE id = ?`,
 		id,
 	)
 	u, err := r.scan(row)
@@ -91,7 +93,7 @@ func (r *userRepository) GetByID(id int64) (*User, error) {
 // List 列出全部用户
 func (r *userRepository) List() ([]User, error) {
 	rows, err := r.db.Query(
-		`SELECT id, username, password_hash, role, created_at, updated_at FROM users ORDER BY id ASC`,
+		`SELECT id, username, password_hash, role, source, created_at, updated_at FROM users ORDER BY id ASC`,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("list users: %w", err)
@@ -101,7 +103,7 @@ func (r *userRepository) List() ([]User, error) {
 	var users []User
 	for rows.Next() {
 		var u User
-		if err := rows.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Role, &u.CreatedAt, &u.UpdatedAt); err != nil {
+		if err := rows.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Role, &u.Source, &u.CreatedAt, &u.UpdatedAt); err != nil {
 			return nil, err
 		}
 		users = append(users, u)
@@ -109,14 +111,30 @@ func (r *userRepository) List() ([]User, error) {
 	return users, rows.Err()
 }
 
-// Create 新增用户
+// Create 新增本地用户
 func (r *userRepository) Create(username, passwordHash, role string) (*User, error) {
 	res, err := r.db.Exec(
-		`INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)`,
+		`INSERT INTO users (username, password_hash, role, source) VALUES (?, ?, ?, 'local')`,
 		username, passwordHash, role,
 	)
 	if err != nil {
 		// SQLite UNIQUE 冲突
+		return nil, ErrUserExists
+	}
+	id, _ := res.LastInsertId()
+	return r.GetByID(id)
+}
+
+// CreateSSO 创建 SSO 用户（无密码，password_hash 留占位禁止本地登录）
+func (r *userRepository) CreateSSO(username, role, source string) (*User, error) {
+	if source == "" {
+		source = "sso"
+	}
+	res, err := r.db.Exec(
+		`INSERT INTO users (username, password_hash, role, source) VALUES (?, '!', ?, ?)`,
+		username, role, source,
+	)
+	if err != nil {
 		return nil, ErrUserExists
 	}
 	id, _ := res.LastInsertId()

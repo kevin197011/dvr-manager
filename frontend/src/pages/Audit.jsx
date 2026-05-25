@@ -42,6 +42,10 @@ const ACTION_OPTIONS = [
   { value: 'user_update_role', label: '修改用户角色' },
   { value: 'user_reset_password', label: '重置用户密码' },
   { value: 'user_delete', label: '删除用户' },
+  { value: 'sso_create', label: '新增 SSO 提供商' },
+  { value: 'sso_update', label: '更新 SSO 提供商' },
+  { value: 'sso_toggle', label: 'SSO 启用/停用' },
+  { value: 'sso_delete', label: '删除 SSO 提供商' },
 ];
 
 function Audit() {

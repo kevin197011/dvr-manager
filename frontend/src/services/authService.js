@@ -76,6 +76,17 @@ export const authService = {
       new_password: newPassword,
     });
   },
+
+  /** 列出已启用的 SSO 提供商（登录页用） */
+  listSSOProviders: async () => {
+    return await api.get('/auth/sso/providers');
+  },
+
+  /** 拼装登录 URL，前端直接跳转到该地址 */
+  ssoLoginURL: (provider) => {
+    const base = API_BASE_URL.replace(/\/$/, '');
+    return `${base}/auth/sso/${provider.type}/${provider.id}/login`;
+  },
 };
 
 export const dvrService = {
@@ -146,6 +157,23 @@ export const adminService = {
   /** 删除用户 */
   deleteUser: async (id) => {
     return await api.delete(`/admin/users/${id}`);
+  },
+
+  /** SSO 提供商管理 */
+  listSSOProvidersAdmin: async () => {
+    return await api.get('/admin/sso/providers');
+  },
+  createSSOProvider: async (payload) => {
+    return await api.post('/admin/sso/providers', payload);
+  },
+  updateSSOProvider: async (id, payload) => {
+    return await api.put(`/admin/sso/providers/${id}`, payload);
+  },
+  toggleSSOProvider: async (id) => {
+    return await api.post(`/admin/sso/providers/${id}/toggle`);
+  },
+  deleteSSOProvider: async (id) => {
+    return await api.delete(`/admin/sso/providers/${id}`);
   },
 };
 

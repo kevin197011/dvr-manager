@@ -31,6 +31,7 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	dvrRepo := repository.NewDVRRepository()
 	auditRepo := repository.NewAuditRepository()
 	userRepo := repository.NewUserRepository()
+	ssoRepo := repository.NewSSORepository()
 
 	// 初始化服务
 	cacheInstance := cache.NewMemoryCache()
@@ -38,6 +39,7 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	proxyService := service.NewProxyService(cfg)
 	configService := service.NewConfigService(configRepo, dvrRepo)
 	authService := service.NewAuthService(userRepo)
+	ssoService := service.NewSSOService(ssoRepo)
 
 	// JWT Secret（从环境变量读取，默认使用固定值）
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -51,6 +53,8 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	adminHandler := handler.NewAdminHandler(configService, auditRepo)
 	auditHandler := handler.NewAuditHandler(auditRepo)
 	userHandler := handler.NewUserHandler(authService, auditRepo)
+	ssoHandler := handler.NewSSOHandler(ssoService, authService, auditRepo, jwtSecret)
+	ssoAdminHandler := handler.NewSSOAdminHandler(ssoRepo, ssoService, auditRepo)
 
 	// 认证路由（不需要认证）
 	auth := r.Group("/api/auth")
@@ -58,6 +62,14 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 		auth.POST("/login", authHandler.Login)
 		auth.GET("/me", authHandler.Me)
 		auth.POST("/logout", authHandler.Logout)
+
+		// SSO 登录与回调
+		auth.GET("/sso/providers", ssoHandler.ListProviders)
+		auth.GET("/sso/oidc/:id/login", ssoHandler.OIDCLogin)
+		auth.GET("/sso/oidc/:id/callback", ssoHandler.OIDCCallback)
+		auth.GET("/sso/saml/:id/login", ssoHandler.SAMLLogin)
+		auth.GET("/sso/saml/:id/metadata", ssoHandler.SAMLMetadata)
+		auth.POST("/sso/saml/:id/acs", ssoHandler.SAMLACS)
 	}
 
 	// 需要登录的认证相关路由
@@ -95,6 +107,13 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 		admin.PUT("/users/:id/role", userHandler.UpdateRole)
 		admin.POST("/users/:id/reset-password", userHandler.ResetPassword)
 		admin.DELETE("/users/:id", userHandler.Delete)
+
+		// SSO 提供商管理
+		admin.GET("/sso/providers", ssoAdminHandler.List)
+		admin.POST("/sso/providers", ssoAdminHandler.Create)
+		admin.PUT("/sso/providers/:id", ssoAdminHandler.Update)
+		admin.POST("/sso/providers/:id/toggle", ssoAdminHandler.Toggle)
+		admin.DELETE("/sso/providers/:id", ssoAdminHandler.Delete)
 	}
 
 	// 视频流代理路由（可选认证，仅用于在审计日志中记录登录用户）
