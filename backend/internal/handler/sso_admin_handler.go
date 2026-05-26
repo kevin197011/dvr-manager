@@ -81,8 +81,8 @@ func (h *SSOAdminHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "请求参数错误"})
 		return
 	}
-	if req.Type != repository.SSOTypeOIDC && req.Type != repository.SSOTypeSAML {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "type 必须为 oidc 或 saml"})
+	if req.Type != repository.SSOTypeOIDC {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "type 必须为 oidc"})
 		return
 	}
 	if msg := validateProviderConfig(req.Type, req.Config); msg != "" {
@@ -199,23 +199,11 @@ func (h *SSOAdminHandler) Delete(c *gin.Context) {
 
 // validateProviderConfig 简单校验关键字段
 func validateProviderConfig(t string, cfg map[string]interface{}) string {
-	switch t {
-	case repository.SSOTypeOIDC:
+	if t == repository.SSOTypeOIDC {
 		for _, k := range []string{"issuer", "client_id", "client_secret", "redirect_url"} {
 			if v, _ := cfg[k].(string); v == "" {
 				return "OIDC 缺少必填字段: " + k
 			}
-		}
-	case repository.SSOTypeSAML:
-		for _, k := range []string{"base_url", "sp_cert_pem", "sp_key_pem"} {
-			if v, _ := cfg[k].(string); v == "" {
-				return "SAML 缺少必填字段: " + k
-			}
-		}
-		mdURL, _ := cfg["idp_metadata_url"].(string)
-		mdXML, _ := cfg["idp_metadata_xml"].(string)
-		if mdURL == "" && mdXML == "" {
-			return "SAML 必须提供 idp_metadata_url 或 idp_metadata_xml"
 		}
 	}
 	return ""

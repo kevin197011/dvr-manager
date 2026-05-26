@@ -4,7 +4,6 @@ import {
   UserOutlined,
   LockOutlined,
   CloudOutlined,
-  SafetyOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -166,22 +165,21 @@ function Login() {
                 <span style={{ fontSize: 12, color: '#94A3B8' }}>或使用单点登录</span>
               </Divider>
               <Space direction="vertical" style={{ width: '100%' }}>
-                {ssoProviders.map((p) => {
-                  const Icon = p.type === 'oidc' ? CloudOutlined : SafetyOutlined;
-                  return (
+                {ssoProviders
+                  .filter((p) => p.type === 'oidc')
+                  .map((p) => (
                     <Button
-                      key={`${p.type}-${p.id}`}
+                      key={`oidc-${p.id}`}
                       block
                       size="large"
-                      icon={<Icon />}
+                      icon={<CloudOutlined />}
                       onClick={() => {
                         window.location.href = authService.ssoLoginURL(p);
                       }}
                     >
                       使用 {p.name} 登录
                     </Button>
-                  );
-                })}
+                  ))}
               </Space>
             </>
           )}

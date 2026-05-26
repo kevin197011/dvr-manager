@@ -12,7 +12,6 @@ import (
 // SSO 提供商类型常量
 const (
 	SSOTypeOIDC = "oidc"
-	SSOTypeSAML = "saml"
 )
 
 // ErrSSOProviderNotFound 提供商不存在
@@ -21,7 +20,7 @@ var ErrSSOProviderNotFound = errors.New("sso 提供商不存在")
 // SSOProvider SSO 提供商记录
 type SSOProvider struct {
 	ID         int64     `json:"id"`
-	Type       string    `json:"type"`        // oidc / saml
+	Type       string    `json:"type"`        // oidc
 	Name       string    `json:"name"`        // 展示名
 	Enabled    bool      `json:"enabled"`     // 是否启用
 	ConfigJSON string    `json:"config_json"` // 协议相关配置 JSON

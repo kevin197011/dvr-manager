@@ -111,7 +111,7 @@ func createTables() error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
-		// SSO 提供商配置表（OIDC / SAML），config_json 存储协议相关参数
+		// SSO 提供商配置表（OIDC），config_json 存储协议相关参数
 		`CREATE TABLE IF NOT EXISTS sso_providers (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			type TEXT NOT NULL,

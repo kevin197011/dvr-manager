@@ -63,13 +63,10 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 		auth.GET("/me", authHandler.Me)
 		auth.POST("/logout", authHandler.Logout)
 
-		// SSO 登录与回调
+		// SSO 登录与回调（仅 OIDC）
 		auth.GET("/sso/providers", ssoHandler.ListProviders)
 		auth.GET("/sso/oidc/:id/login", ssoHandler.OIDCLogin)
 		auth.GET("/sso/oidc/:id/callback", ssoHandler.OIDCCallback)
-		auth.GET("/sso/saml/:id/login", ssoHandler.SAMLLogin)
-		auth.GET("/sso/saml/:id/metadata", ssoHandler.SAMLMetadata)
-		auth.POST("/sso/saml/:id/acs", ssoHandler.SAMLACS)
 	}
 
 	// 需要登录的认证相关路由
