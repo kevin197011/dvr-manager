@@ -3,7 +3,7 @@ import {
   Layout as AntLayout,
   Menu,
   Avatar,
-  Dropdown,
+  Popover,
   Space,
   Switch,
   Modal,
@@ -40,6 +40,7 @@ function Layout() {
   const [pwdOpen, setPwdOpen] = useState(false);
   const [pwdLoading, setPwdLoading] = useState(false);
   const [pwdForm] = Form.useForm();
+  const [userPopOpen, setUserPopOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -80,33 +81,39 @@ function Layout() {
       : []),
   ];
 
-  const userMenuItems = [
-    {
-      key: 'change-password',
-      icon: <KeyOutlined />,
-      label: '修改密码',
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: '退出登录',
-      danger: true,
-    },
-  ];
-
-  const handleMenuClick = ({ key }) => {
-    if (key === 'logout') {
-      handleLogout();
-    } else if (key === 'change-password') {
-      pwdForm.resetFields();
-      setPwdOpen(true);
-    } else {
-      navigate(key);
-    }
+  const handleChangePasswordClick = () => {
+    setUserPopOpen(false);
+    pwdForm.resetFields();
+    setPwdOpen(true);
   };
+
+  const handleLogoutClick = () => {
+    setUserPopOpen(false);
+    handleLogout();
+  };
+
+  const userPopContent = (
+    <div className="user-popover-content">
+      <Button
+        type="text"
+        icon={<KeyOutlined />}
+        block
+        onClick={handleChangePasswordClick}
+      >
+        修改密码
+      </Button>
+      <div className="user-popover-divider" />
+      <Button
+        type="text"
+        icon={<LogoutOutlined />}
+        block
+        danger
+        onClick={handleLogoutClick}
+      >
+        退出登录
+      </Button>
+    </div>
+  );
 
   const onChangePassword = async () => {
     try {
@@ -180,10 +187,14 @@ function Layout() {
                   unCheckedChildren="亮"
                 />
               </Space>
-              <Dropdown
-                menu={{ items: userMenuItems, onClick: handleMenuClick }}
+              <Popover
+                content={userPopContent}
+                trigger="click"
                 placement="bottomRight"
-                trigger={['click']}
+                open={userPopOpen}
+                onOpenChange={setUserPopOpen}
+                arrow={false}
+                overlayClassName="user-popover-overlay"
                 overlayStyle={{ zIndex: 1500 }}
               >
                 <Button type="text" className="user-info-btn">
@@ -195,7 +206,7 @@ function Layout() {
                     )}
                   </span>
                 </Button>
-              </Dropdown>
+              </Popover>
             </Space>
           </div>
         </Header>

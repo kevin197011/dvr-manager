@@ -104,6 +104,31 @@
   }
 }
 
+/* 用户菜单 Popover */
+.user-popover-overlay .ant-popover-inner {
+  padding: 4px;
+  min-width: 160px;
+}
+
+.user-popover-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-popover-content .ant-btn {
+  text-align: left;
+  justify-content: flex-start;
+  height: 36px;
+  padding: 0 12px;
+}
+
+.user-popover-divider {
+  height: 1px;
+  background: var(--border-secondary);
+  margin: 4px 0;
+}
+
 /* Content 区域 */
 .app-content {
   margin: var(--spacing-lg);
