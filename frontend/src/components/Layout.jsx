@@ -179,10 +179,15 @@ function Layout() {
                   onClick: handleMenuClick,
                 }}
                 placement="bottomRight"
+                trigger={['click']}
               >
-                <Space className="user-info" style={{ cursor: 'pointer' }}>
+                <a
+                  onClick={(e) => e.preventDefault()}
+                  className="user-info"
+                  style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', color: 'inherit' }}
+                >
                   <Avatar icon={<UserOutlined />} />
-                  <span>
+                  <span style={{ marginLeft: 8 }}>
                     {user?.username || 'User'}
                     {user?.role === 'admin' && (
                       <span style={{ marginLeft: 8, color: 'var(--ant-color-primary)', fontSize: 12 }}>
@@ -190,7 +195,7 @@ function Layout() {
                       </span>
                     )}
                   </span>
-                </Space>
+                </a>
               </Dropdown>
             </Space>
           </div>
