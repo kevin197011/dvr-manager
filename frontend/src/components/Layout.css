@@ -75,13 +75,27 @@
 }
 
 .user-info {
-  padding: 0 var(--spacing-md);
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  height: 40px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: opacity var(--transition-fast) var(--transition-easing);
+  user-select: none;
+  outline: none;
+  transition: background-color var(--transition-fast) var(--transition-easing);
 }
 
 .user-info:hover {
-  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] .user-info:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.user-info:focus-visible {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
 }
 
 /* Content 区域 */

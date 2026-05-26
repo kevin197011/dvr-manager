@@ -39,6 +39,12 @@ function Layout() {
   const [pwdOpen, setPwdOpen] = useState(false);
   const [pwdLoading, setPwdLoading] = useState(false);
   const [pwdForm] = Form.useForm();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   // 根据用户角色显示菜单
   const menuItems = [
@@ -92,9 +98,9 @@ function Layout() {
   ];
 
   const handleMenuClick = ({ key }) => {
+    setUserMenuOpen(false);
     if (key === 'logout') {
-      logout();
-      navigate('/login');
+      handleLogout();
     } else if (key === 'change-password') {
       pwdForm.resetFields();
       setPwdOpen(true);
@@ -174,17 +180,25 @@ function Layout() {
                 />
               </Space>
               <Dropdown
-                menu={{
-                  items: userMenuItems,
-                  onClick: handleMenuClick,
-                }}
+                menu={{ items: userMenuItems, onClick: handleMenuClick }}
                 placement="bottomRight"
                 trigger={['click']}
+                open={userMenuOpen}
+                onOpenChange={setUserMenuOpen}
+                getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
+                overlayStyle={{ zIndex: 1500 }}
               >
-                <a
-                  onClick={(e) => e.preventDefault()}
+                <div
+                  role="button"
+                  tabIndex={0}
                   className="user-info"
-                  style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', color: 'inherit' }}
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setUserMenuOpen((v) => !v);
+                    }
+                  }}
                 >
                   <Avatar icon={<UserOutlined />} />
                   <span style={{ marginLeft: 8 }}>
@@ -195,7 +209,7 @@ function Layout() {
                       </span>
                     )}
                   </span>
-                </a>
+                </div>
               </Dropdown>
             </Space>
           </div>
