@@ -9,6 +9,7 @@ import {
   Modal,
   Form,
   Input,
+  Button,
   message,
 } from 'antd';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
@@ -39,7 +40,6 @@ function Layout() {
   const [pwdOpen, setPwdOpen] = useState(false);
   const [pwdLoading, setPwdLoading] = useState(false);
   const [pwdForm] = Form.useForm();
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -98,7 +98,6 @@ function Layout() {
   ];
 
   const handleMenuClick = ({ key }) => {
-    setUserMenuOpen(false);
     if (key === 'logout') {
       handleLogout();
     } else if (key === 'change-password') {
@@ -185,32 +184,17 @@ function Layout() {
                 menu={{ items: userMenuItems, onClick: handleMenuClick }}
                 placement="bottomRight"
                 trigger={['click']}
-                open={userMenuOpen}
-                onOpenChange={setUserMenuOpen}
                 overlayStyle={{ zIndex: 1500 }}
               >
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className="user-info"
-                  onClick={() => setUserMenuOpen((v) => !v)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setUserMenuOpen((v) => !v);
-                    }
-                  }}
-                >
-                  <Avatar icon={<UserOutlined />} />
-                  <span style={{ marginLeft: 8 }}>
+                <Button type="text" className="user-info-btn">
+                  <Avatar icon={<UserOutlined />} size="small" />
+                  <span className="user-info-name">
                     {user?.username || 'User'}
                     {user?.role === 'admin' && (
-                      <span style={{ marginLeft: 8, color: 'var(--ant-color-primary)', fontSize: 12 }}>
-                        (管理员)
-                      </span>
+                      <span className="user-info-role">(管理员)</span>
                     )}
                   </span>
-                </div>
+                </Button>
               </Dropdown>
             </Space>
           </div>

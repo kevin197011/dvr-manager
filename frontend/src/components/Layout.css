@@ -71,30 +71,37 @@
 .header-right {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
 }
 
-.user-info {
+.user-info-btn {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
   height: 40px;
+  padding: 4px 12px;
   border-radius: 8px;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-  transition: background-color var(--transition-fast) var(--transition-easing);
 }
 
-.user-info:hover {
-  background: rgba(0, 0, 0, 0.04);
+.user-info-btn .user-info-name {
+  margin-left: 8px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-[data-theme='dark'] .user-info:hover {
-  background: rgba(255, 255, 255, 0.06);
+.user-info-btn .user-info-role {
+  margin-left: 8px;
+  color: var(--color-primary);
+  font-size: 12px;
 }
 
-.user-info:focus-visible {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+@media (max-width: 480px) {
+  .user-info-btn .user-info-name {
+    display: none;
+  }
 }
 
 /* Content 区域 */
