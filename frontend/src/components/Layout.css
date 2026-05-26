@@ -104,26 +104,69 @@
   }
 }
 
-/* 用户菜单 Popover */
-.user-popover-overlay .ant-popover-inner {
-  padding: 4px;
+/* 用户菜单（纯 CSS 定位，不依赖 portal） */
+.user-menu-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.user-menu-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 1500;
   min-width: 160px;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
 }
 
-.user-popover-content {
+[data-theme='dark'] .user-menu-panel {
+  background: #334155;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.user-menu-item {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.user-popover-content .ant-btn {
-  text-align: left;
-  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
   height: 36px;
   padding: 0 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms ease;
 }
 
-.user-popover-divider {
+.user-menu-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .user-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.user-menu-item:focus-visible {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.user-menu-item-danger {
+  color: var(--color-error);
+}
+
+.user-menu-item-danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.user-menu-divider {
   height: 1px;
   background: var(--border-secondary);
   margin: 4px 0;

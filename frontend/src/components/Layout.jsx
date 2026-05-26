@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Layout as AntLayout,
   Menu,
   Avatar,
-  Popover,
   Space,
   Switch,
   Modal,
@@ -40,7 +39,26 @@ function Layout() {
   const [pwdOpen, setPwdOpen] = useState(false);
   const [pwdLoading, setPwdLoading] = useState(false);
   const [pwdForm] = Form.useForm();
-  const [userPopOpen, setUserPopOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuWrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!userMenuOpen) return undefined;
+    const onDocClick = (e) => {
+      if (userMenuWrapRef.current && !userMenuWrapRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    const onEsc = (e) => {
+      if (e.key === 'Escape') setUserMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, [userMenuOpen]);
 
   const handleLogout = () => {
     logout();
@@ -82,38 +100,15 @@ function Layout() {
   ];
 
   const handleChangePasswordClick = () => {
-    setUserPopOpen(false);
+    setUserMenuOpen(false);
     pwdForm.resetFields();
     setPwdOpen(true);
   };
 
   const handleLogoutClick = () => {
-    setUserPopOpen(false);
+    setUserMenuOpen(false);
     handleLogout();
   };
-
-  const userPopContent = (
-    <div className="user-popover-content">
-      <Button
-        type="text"
-        icon={<KeyOutlined />}
-        block
-        onClick={handleChangePasswordClick}
-      >
-        修改密码
-      </Button>
-      <div className="user-popover-divider" />
-      <Button
-        type="text"
-        icon={<LogoutOutlined />}
-        block
-        danger
-        onClick={handleLogoutClick}
-      >
-        退出登录
-      </Button>
-    </div>
-  );
 
   const onChangePassword = async () => {
     try {
@@ -187,17 +182,12 @@ function Layout() {
                   unCheckedChildren="亮"
                 />
               </Space>
-              <Popover
-                content={userPopContent}
-                trigger="click"
-                placement="bottomRight"
-                open={userPopOpen}
-                onOpenChange={setUserPopOpen}
-                arrow={false}
-                overlayClassName="user-popover-overlay"
-                overlayStyle={{ zIndex: 1500 }}
-              >
-                <Button type="text" className="user-info-btn">
+              <div className="user-menu-wrap" ref={userMenuWrapRef}>
+                <Button
+                  type="text"
+                  className="user-info-btn"
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                >
                   <Avatar icon={<UserOutlined />} size="small" />
                   <span className="user-info-name">
                     {user?.username || 'User'}
@@ -206,7 +196,28 @@ function Layout() {
                     )}
                   </span>
                 </Button>
-              </Popover>
+                {userMenuOpen && (
+                  <div className="user-menu-panel" role="menu">
+                    <button
+                      type="button"
+                      className="user-menu-item"
+                      onClick={handleChangePasswordClick}
+                    >
+                      <KeyOutlined />
+                      <span>修改密码</span>
+                    </button>
+                    <div className="user-menu-divider" />
+                    <button
+                      type="button"
+                      className="user-menu-item user-menu-item-danger"
+                      onClick={handleLogoutClick}
+                    >
+                      <LogoutOutlined />
+                      <span>退出登录</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </Space>
           </div>
         </Header>
