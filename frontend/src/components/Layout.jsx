@@ -141,6 +141,8 @@ function Layout() {
         collapsed={collapsed}
         onCollapse={setCollapsed}
         theme={theme}
+        breakpoint="lg"
+        collapsedWidth={64}
       >
         <div className="logo">
           <Link 
@@ -185,7 +187,6 @@ function Layout() {
                 trigger={['click']}
                 open={userMenuOpen}
                 onOpenChange={setUserMenuOpen}
-                getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
                 overlayStyle={{ zIndex: 1500 }}
               >
                 <div

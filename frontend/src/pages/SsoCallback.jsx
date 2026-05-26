@@ -23,6 +23,7 @@ function SsoCallback() {
       return;
     }
     hydrate({ token, user: { username, role: role || 'user' } });
+    // 用 replace 跳到首页，并让 React 在下一帧再执行，确保当前组件先卸载
     navigate('/', { replace: true });
   }, [params, hydrate, navigate]);
 
@@ -42,8 +43,18 @@ function SsoCallback() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Spin tip="SSO 登录处理中..." size="large" />
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 16,
+      }}
+    >
+      <Spin size="large" />
+      <span style={{ color: '#64748B' }}>SSO 登录处理中...</span>
     </div>
   );
 }

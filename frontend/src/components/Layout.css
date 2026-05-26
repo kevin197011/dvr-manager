@@ -60,11 +60,10 @@
   transition: background-color var(--transition-slow) var(--transition-easing),
               box-shadow var(--transition-slow) var(--transition-easing);
   border-bottom: 1px solid var(--border-secondary);
-  backdrop-filter: blur(10px);
 }
 
 [data-theme='dark'] .app-header {
-  background: rgba(30, 41, 59, 0.8);
+  background: #1E293B;
   box-shadow: var(--shadow-md);
   border-bottom-color: var(--border-secondary);
 }
@@ -111,10 +110,9 @@
 }
 
 [data-theme='dark'] .app-content {
-  background: rgba(30, 41, 59, 0.6);
+  background: #1E293B;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--border-secondary);
-  backdrop-filter: blur(10px);
 }
 
 /* Footer 区域 */
@@ -128,9 +126,8 @@
 }
 
 [data-theme='dark'] .app-footer {
-  background: rgba(30, 41, 59, 0.8);
+  background: #1E293B;
   border-top-color: var(--border-secondary);
-  backdrop-filter: blur(10px);
 }
 
 .app-footer div {
@@ -140,9 +137,8 @@
 
 /* 侧边栏暗色主题优化 */
 [data-theme='dark'] .ant-layout-sider {
-  background: rgba(15, 23, 42, 0.9) !important;
+  background: #0F172A !important;
   border-right: 1px solid var(--border-secondary) !important;
-  backdrop-filter: blur(10px);
 }
 
 [data-theme='dark'] .ant-menu {
