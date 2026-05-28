@@ -1,0 +1,2031 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "louvain",
+  "totalFiles": 78,
+  "totalBatches": 11,
+  "exportsByPath": {
+    ".shared/ui-ux-pro-max/scripts/core.py": [
+      "BM25",
+      "_load_csv",
+      "_search_csv",
+      "detect_domain",
+      "search",
+      "search_stack"
+    ],
+    ".shared/ui-ux-pro-max/scripts/search.py": [
+      "format_output"
+    ],
+    "backend/cmd/server/main.go": [],
+    "backend/internal/config/config.go": [
+      "Config",
+      "ServerConfig",
+      "DVRConfig",
+      "CORSConfig",
+      "SetConfig",
+      "GetConfig"
+    ],
+    "backend/internal/handler/admin_handler.go": [
+      "AdminHandler",
+      "NewAdminHandler",
+      "GetDVRServersResponse",
+      "UpdateDVRServersRequest",
+      "UpdateDVRServersResponse",
+      "GetDVRServers",
+      "UpdateDVRServers",
+      "GetConfig",
+      "UpdateConfigRequest",
+      "UpdateConfig",
+      "ReloadConfig"
+    ],
+    "backend/internal/handler/audit_handler.go": [
+      "AuditHandler",
+      "NewAuditHandler",
+      "ListQuery",
+      "GetAudit",
+      "Cleanup"
+    ],
+    "backend/internal/handler/auth_handler.go": [
+      "AuthHandler",
+      "NewAuthHandler",
+      "LoginRequest",
+      "LoginResponse",
+      "UserInfo",
+      "VerifyResponse",
+      "Claims",
+      "Login",
+      "Me",
+      "ChangePasswordRequest",
+      "ChangePassword",
+      "Logout",
+      "VerifyToken"
+    ],
+    "backend/internal/handler/config_handler.go": [
+      "ConfigHandler",
+      "NewConfigHandler",
+      "ConfigResponse",
+      "Handle"
+    ],
+    "backend/internal/handler/health_handler.go": [
+      "HealthHandler",
+      "NewHealthHandler",
+      "Handle"
+    ],
+    "backend/internal/handler/play_handler.go": [
+      "PlayHandler",
+      "NewPlayHandler",
+      "PlayRequest",
+      "PlayResponse",
+      "BatchPlayResponse",
+      "RecordingResult",
+      "Handle",
+      "HandleBatch"
+    ],
+    "backend/internal/handler/proxy_handler.go": [
+      "ProxyHandler",
+      "NewProxyHandler",
+      "Handle"
+    ],
+    "backend/internal/handler/sso_admin_handler.go": [
+      "SSOAdminHandler",
+      "NewSSOAdminHandler",
+      "SSOProviderRequest",
+      "List",
+      "Create",
+      "Update",
+      "Toggle",
+      "Delete"
+    ],
+    "backend/internal/handler/sso_handler.go": [
+      "SSOHandler",
+      "NewSSOHandler",
+      "ListProviders",
+      "OIDCLogin",
+      "OIDCCallback"
+    ],
+    "backend/internal/handler/user_handler.go": [
+      "UserHandler",
+      "NewUserHandler",
+      "CreateUserRequest",
+      "UpdateRoleRequest",
+      "ResetPasswordRequest",
+      "List",
+      "Create",
+      "UpdateRole",
+      "ResetPassword",
+      "Delete"
+    ],
+    "backend/internal/middleware/auth.go": [
+      "AuthMiddleware",
+      "AdminMiddleware",
+      "OptionalAuthMiddleware"
+    ],
+    "backend/internal/middleware/cors.go": [
+      "CORSMiddleware"
+    ],
+    "backend/internal/middleware/logger.go": [
+      "LoggerMiddleware"
+    ],
+    "backend/internal/repository/audit_repository.go": [
+      "AuditEntry",
+      "AuditRepository",
+      "NewAuditRepository",
+      "Insert",
+      "List",
+      "DeleteOlderThan"
+    ],
+    "backend/internal/repository/config_repository.go": [
+      "ConfigRepository",
+      "NewConfigRepository",
+      "GetDefaultConfig",
+      "GetConfig",
+      "SaveConfig"
+    ],
+    "backend/internal/repository/dvr_repository.go": [
+      "DVRRepository",
+      "NewDVRRepository",
+      "GetAll",
+      "Save",
+      "Add",
+      "Delete"
+    ],
+    "backend/internal/repository/sso_repository.go": [
+      "SSOProvider",
+      "SSORepository",
+      "NewSSORepository",
+      "List",
+      "ListEnabled",
+      "GetByID",
+      "Create",
+      "Update",
+      "SetEnabled",
+      "Delete"
+    ],
+    "backend/internal/repository/user_repository.go": [
+      "User",
+      "UserRepository",
+      "NewUserRepository",
+      "GetByUsername",
+      "GetByID",
+      "List",
+      "Create",
+      "CreateSSO",
+      "UpdatePassword",
+      "UpdateRole",
+      "Delete",
+      "Count"
+    ],
+    "backend/internal/router/router.go": [
+      "NewRouter"
+    ],
+    "backend/internal/service/auth_service.go": [
+      "User",
+      "AuthService",
+      "NewAuthService",
+      "Authenticate",
+      "FindOrCreateSSOUser",
+      "GetUser",
+      "GetUserByID",
+      "ChangePassword",
+      "ListUsers",
+      "CreateUser",
+      "ResetPassword",
+      "UpdateUserRole",
+      "DeleteUser"
+    ],
+    "backend/internal/service/config_service.go": [
+      "ConfigService",
+      "NewConfigService",
+      "GetConfig",
+      "UpdateConfig",
+      "GetDVRServers",
+      "UpdateDVRServers",
+      "ReloadConfig"
+    ],
+    "backend/internal/service/dvr_service.go": [
+      "DVRService",
+      "NewDVRService",
+      "UpdateConfig",
+      "DVRQueryResult",
+      "FindRecording"
+    ],
+    "backend/internal/service/proxy_service.go": [
+      "ProxyService",
+      "NewProxyService",
+      "ProxyStream"
+    ],
+    "backend/internal/service/sso_service.go": [
+      "OIDCConfig",
+      "SSOProviderInfo",
+      "SSOService",
+      "NewSSOService",
+      "Reload",
+      "ListProviders",
+      "BuildOIDCAuthURL",
+      "ExchangeOIDC",
+      "GenerateState"
+    ],
+    "backend/pkg/cache/cache.go": [
+      "Cache",
+      "NewMemoryCache",
+      "Set",
+      "Get"
+    ],
+    "backend/pkg/db/db.go": [
+      "InitDB",
+      "GetDB",
+      "Close"
+    ],
+    "backend/server": [],
+    "frontend/nginx.conf": [],
+    "frontend/src/App.jsx": [],
+    "frontend/src/components/AdminRoute.jsx": [],
+    "frontend/src/components/Layout.jsx": [],
+    "frontend/src/components/ProtectedRoute.jsx": [],
+    "frontend/src/components/VideoPlayer.jsx": [],
+    "frontend/src/config/theme.js": [
+      "designSystem",
+      "getAntdTheme",
+      "getCSSVariables"
+    ],
+    "frontend/src/main.jsx": [],
+    "frontend/src/pages/Admin.jsx": [],
+    "frontend/src/pages/Audit.jsx": [],
+    "frontend/src/pages/Home.jsx": [],
+    "frontend/src/pages/Login.jsx": [],
+    "frontend/src/pages/SsoCallback.jsx": [],
+    "frontend/src/pages/SsoConfig.jsx": [],
+    "frontend/src/pages/Users.jsx": [],
+    "frontend/src/services/authService.js": [
+      "authService",
+      "dvrService",
+      "adminService"
+    ],
+    "frontend/src/store/authStore.js": [
+      "useAuthStore"
+    ],
+    "frontend/src/store/themeStore.js": [
+      "useThemeStore"
+    ],
+    "frontend/vite.config.js": [],
+    "nginx.conf": [],
+    "push.rb": [],
+    "Rakefile": []
+  },
+  "batches": [
+    {
+      "batchIndex": 1,
+      "files": [
+        {
+          "path": "backend/cmd/server/main.go",
+          "language": "go",
+          "sizeLines": 100,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/admin_handler.go",
+          "language": "go",
+          "sizeLines": 232,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/auth_handler.go",
+          "language": "go",
+          "sizeLines": 242,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/play_handler.go",
+          "language": "go",
+          "sizeLines": 198,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/proxy_handler.go",
+          "language": "go",
+          "sizeLines": 83,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/sso_admin_handler.go",
+          "language": "go",
+          "sizeLines": 210,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/sso_handler.go",
+          "language": "go",
+          "sizeLines": 173,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/user_handler.go",
+          "language": "go",
+          "sizeLines": 184,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/repository/audit_repository.go",
+          "language": "go",
+          "sizeLines": 129,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/repository/config_repository.go",
+          "language": "go",
+          "sizeLines": 116,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/repository/dvr_repository.go",
+          "language": "go",
+          "sizeLines": 134,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/repository/sso_repository.go",
+          "language": "go",
+          "sizeLines": 172,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/repository/user_repository.go",
+          "language": "go",
+          "sizeLines": 184,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/service/auth_service.go",
+          "language": "go",
+          "sizeLines": 262,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/service/config_service.go",
+          "language": "go",
+          "sizeLines": 168,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/service/dvr_service.go",
+          "language": "go",
+          "sizeLines": 222,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/service/proxy_service.go",
+          "language": "go",
+          "sizeLines": 94,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/service/sso_service.go",
+          "language": "go",
+          "sizeLines": 237,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/pkg/db/db.go",
+          "language": "go",
+          "sizeLines": 160,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "backend/cmd/server/main.go": [
+          "backend/internal/config/config.go",
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go",
+          "backend/internal/router/router.go",
+          "backend/pkg/db/db.go"
+        ],
+        "backend/internal/handler/admin_handler.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go",
+          "backend/internal/service/auth_service.go",
+          "backend/internal/service/config_service.go",
+          "backend/internal/service/dvr_service.go",
+          "backend/internal/service/proxy_service.go",
+          "backend/internal/service/sso_service.go"
+        ],
+        "backend/internal/handler/auth_handler.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go",
+          "backend/internal/service/auth_service.go",
+          "backend/internal/service/config_service.go",
+          "backend/internal/service/dvr_service.go",
+          "backend/internal/service/proxy_service.go",
+          "backend/internal/service/sso_service.go"
+        ],
+        "backend/internal/handler/play_handler.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go",
+          "backend/internal/service/auth_service.go",
+          "backend/internal/service/config_service.go",
+          "backend/internal/service/dvr_service.go",
+          "backend/internal/service/proxy_service.go",
+          "backend/internal/service/sso_service.go",
+          "backend/pkg/cache/cache.go"
+        ],
+        "backend/internal/handler/proxy_handler.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go",
+          "backend/internal/service/auth_service.go",
+          "backend/internal/service/config_service.go",
+          "backend/internal/service/dvr_service.go",
+          "backend/internal/service/proxy_service.go",
+          "backend/internal/service/sso_service.go",
+          "backend/pkg/cache/cache.go"
+        ],
+        "backend/internal/handler/sso_admin_handler.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go",
+          "backend/internal/service/auth_service.go",
+          "backend/internal/service/config_service.go",
+          "backend/internal/service/dvr_service.go",
+          "backend/internal/service/proxy_service.go",
+          "backend/internal/service/sso_service.go"
+        ],
+        "backend/internal/handler/sso_handler.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go",
+          "backend/internal/service/auth_service.go",
+          "backend/internal/service/config_service.go",
+          "backend/internal/service/dvr_service.go",
+          "backend/internal/service/proxy_service.go",
+          "backend/internal/service/sso_service.go"
+        ],
+        "backend/internal/handler/user_handler.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go",
+          "backend/internal/service/auth_service.go",
+          "backend/internal/service/config_service.go",
+          "backend/internal/service/dvr_service.go",
+          "backend/internal/service/proxy_service.go",
+          "backend/internal/service/sso_service.go"
+        ],
+        "backend/internal/repository/audit_repository.go": [
+          "backend/pkg/db/db.go"
+        ],
+        "backend/internal/repository/config_repository.go": [
+          "backend/internal/config/config.go",
+          "backend/pkg/db/db.go"
+        ],
+        "backend/internal/repository/dvr_repository.go": [
+          "backend/pkg/db/db.go"
+        ],
+        "backend/internal/repository/sso_repository.go": [
+          "backend/pkg/db/db.go"
+        ],
+        "backend/internal/repository/user_repository.go": [
+          "backend/pkg/db/db.go"
+        ],
+        "backend/internal/service/auth_service.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go"
+        ],
+        "backend/internal/service/config_service.go": [
+          "backend/internal/config/config.go",
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go"
+        ],
+        "backend/internal/service/dvr_service.go": [
+          "backend/internal/config/config.go",
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go"
+        ],
+        "backend/internal/service/proxy_service.go": [
+          "backend/internal/config/config.go"
+        ],
+        "backend/internal/service/sso_service.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go"
+        ],
+        "backend/pkg/db/db.go": []
+      },
+      "neighborMap": {
+        "backend/cmd/server/main.go": [
+          {
+            "path": "backend/internal/config/config.go",
+            "batchIndex": 3,
+            "symbols": [
+              "Config",
+              "ServerConfig",
+              "DVRConfig",
+              "CORSConfig",
+              "SetConfig",
+              "GetConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/handler/admin_handler.go": [
+          {
+            "path": "backend/internal/middleware/auth.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuthMiddleware",
+              "AdminMiddleware",
+              "OptionalAuthMiddleware"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/handler/auth_handler.go": [
+          {
+            "path": "backend/internal/middleware/auth.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuthMiddleware",
+              "AdminMiddleware",
+              "OptionalAuthMiddleware"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/handler/play_handler.go": [
+          {
+            "path": "backend/pkg/cache/cache.go",
+            "batchIndex": 3,
+            "symbols": [
+              "Cache",
+              "NewMemoryCache",
+              "Set",
+              "Get"
+            ]
+          },
+          {
+            "path": "backend/internal/middleware/auth.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuthMiddleware",
+              "AdminMiddleware",
+              "OptionalAuthMiddleware"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/handler/proxy_handler.go": [
+          {
+            "path": "backend/pkg/cache/cache.go",
+            "batchIndex": 3,
+            "symbols": [
+              "Cache",
+              "NewMemoryCache",
+              "Set",
+              "Get"
+            ]
+          },
+          {
+            "path": "backend/internal/middleware/auth.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuthMiddleware",
+              "AdminMiddleware",
+              "OptionalAuthMiddleware"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/handler/sso_admin_handler.go": [
+          {
+            "path": "backend/internal/middleware/auth.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuthMiddleware",
+              "AdminMiddleware",
+              "OptionalAuthMiddleware"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/handler/sso_handler.go": [
+          {
+            "path": "backend/internal/middleware/auth.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuthMiddleware",
+              "AdminMiddleware",
+              "OptionalAuthMiddleware"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/handler/user_handler.go": [
+          {
+            "path": "backend/internal/middleware/auth.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuthMiddleware",
+              "AdminMiddleware",
+              "OptionalAuthMiddleware"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/repository/audit_repository.go": [
+          {
+            "path": "backend/internal/handler/audit_handler.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuditHandler",
+              "NewAuditHandler",
+              "ListQuery",
+              "GetAudit",
+              "Cleanup"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/repository/config_repository.go": [
+          {
+            "path": "backend/internal/config/config.go",
+            "batchIndex": 3,
+            "symbols": [
+              "Config",
+              "ServerConfig",
+              "DVRConfig",
+              "CORSConfig",
+              "SetConfig",
+              "GetConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/audit_handler.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuditHandler",
+              "NewAuditHandler",
+              "ListQuery",
+              "GetAudit",
+              "Cleanup"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/repository/dvr_repository.go": [
+          {
+            "path": "backend/internal/handler/audit_handler.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuditHandler",
+              "NewAuditHandler",
+              "ListQuery",
+              "GetAudit",
+              "Cleanup"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/repository/sso_repository.go": [
+          {
+            "path": "backend/internal/handler/audit_handler.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuditHandler",
+              "NewAuditHandler",
+              "ListQuery",
+              "GetAudit",
+              "Cleanup"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/repository/user_repository.go": [
+          {
+            "path": "backend/internal/handler/audit_handler.go",
+            "batchIndex": 3,
+            "symbols": [
+              "AuditHandler",
+              "NewAuditHandler",
+              "ListQuery",
+              "GetAudit",
+              "Cleanup"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/service/auth_service.go": [
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/service/config_service.go": [
+          {
+            "path": "backend/internal/config/config.go",
+            "batchIndex": 3,
+            "symbols": [
+              "Config",
+              "ServerConfig",
+              "DVRConfig",
+              "CORSConfig",
+              "SetConfig",
+              "GetConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/service/dvr_service.go": [
+          {
+            "path": "backend/internal/config/config.go",
+            "batchIndex": 3,
+            "symbols": [
+              "Config",
+              "ServerConfig",
+              "DVRConfig",
+              "CORSConfig",
+              "SetConfig",
+              "GetConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/service/proxy_service.go": [
+          {
+            "path": "backend/internal/config/config.go",
+            "batchIndex": 3,
+            "symbols": [
+              "Config",
+              "ServerConfig",
+              "DVRConfig",
+              "CORSConfig",
+              "SetConfig",
+              "GetConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ],
+        "backend/internal/service/sso_service.go": [
+          {
+            "path": "backend/internal/router/router.go",
+            "batchIndex": 3,
+            "symbols": [
+              "NewRouter"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 2,
+      "files": [
+        {
+          "path": "frontend/src/App.jsx",
+          "language": "javascript",
+          "sizeLines": 67,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/components/AdminRoute.jsx",
+          "language": "javascript",
+          "sizeLines": 15,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/components/Layout.jsx",
+          "language": "javascript",
+          "sizeLines": 284,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/components/ProtectedRoute.jsx",
+          "language": "javascript",
+          "sizeLines": 28,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/components/VideoPlayer.jsx",
+          "language": "javascript",
+          "sizeLines": 73,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/config/theme.js",
+          "language": "javascript",
+          "sizeLines": 254,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/main.jsx",
+          "language": "javascript",
+          "sizeLines": 47,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/pages/Admin.jsx",
+          "language": "javascript",
+          "sizeLines": 510,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/pages/Audit.jsx",
+          "language": "javascript",
+          "sizeLines": 203,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/pages/Home.jsx",
+          "language": "javascript",
+          "sizeLines": 323,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/pages/Login.jsx",
+          "language": "javascript",
+          "sizeLines": 195,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/pages/SsoCallback.jsx",
+          "language": "javascript",
+          "sizeLines": 62,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/pages/SsoConfig.jsx",
+          "language": "javascript",
+          "sizeLines": 292,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/pages/Users.jsx",
+          "language": "javascript",
+          "sizeLines": 321,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/services/authService.js",
+          "language": "javascript",
+          "sizeLines": 180,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/store/authStore.js",
+          "language": "javascript",
+          "sizeLines": 64,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/store/themeStore.js",
+          "language": "javascript",
+          "sizeLines": 26,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "frontend/src/App.jsx": [
+          "frontend/src/components/AdminRoute.jsx",
+          "frontend/src/components/Layout.jsx",
+          "frontend/src/components/ProtectedRoute.jsx",
+          "frontend/src/pages/Admin.jsx",
+          "frontend/src/pages/Audit.jsx",
+          "frontend/src/pages/Home.jsx",
+          "frontend/src/pages/Login.jsx",
+          "frontend/src/pages/SsoCallback.jsx",
+          "frontend/src/pages/SsoConfig.jsx",
+          "frontend/src/pages/Users.jsx"
+        ],
+        "frontend/src/components/AdminRoute.jsx": [
+          "frontend/src/store/authStore.js"
+        ],
+        "frontend/src/components/Layout.jsx": [
+          "frontend/src/components/Layout.css",
+          "frontend/src/services/authService.js",
+          "frontend/src/store/authStore.js",
+          "frontend/src/store/themeStore.js"
+        ],
+        "frontend/src/components/ProtectedRoute.jsx": [
+          "frontend/src/store/authStore.js"
+        ],
+        "frontend/src/components/VideoPlayer.jsx": [],
+        "frontend/src/config/theme.js": [],
+        "frontend/src/main.jsx": [
+          "frontend/src/App.jsx",
+          "frontend/src/config/theme.js",
+          "frontend/src/index.css",
+          "frontend/src/store/themeStore.js"
+        ],
+        "frontend/src/pages/Admin.jsx": [
+          "frontend/src/services/authService.js"
+        ],
+        "frontend/src/pages/Audit.jsx": [
+          "frontend/src/services/authService.js"
+        ],
+        "frontend/src/pages/Home.jsx": [
+          "frontend/src/components/VideoPlayer.jsx",
+          "frontend/src/services/authService.js"
+        ],
+        "frontend/src/pages/Login.jsx": [
+          "frontend/src/pages/Login.css",
+          "frontend/src/services/authService.js",
+          "frontend/src/store/authStore.js"
+        ],
+        "frontend/src/pages/SsoCallback.jsx": [
+          "frontend/src/store/authStore.js"
+        ],
+        "frontend/src/pages/SsoConfig.jsx": [
+          "frontend/src/services/authService.js"
+        ],
+        "frontend/src/pages/Users.jsx": [
+          "frontend/src/services/authService.js",
+          "frontend/src/store/authStore.js"
+        ],
+        "frontend/src/services/authService.js": [],
+        "frontend/src/store/authStore.js": [
+          "frontend/src/services/authService.js"
+        ],
+        "frontend/src/store/themeStore.js": []
+      },
+      "neighborMap": {
+        "frontend/src/components/Layout.jsx": [
+          {
+            "path": "frontend/src/components/Layout.css",
+            "batchIndex": 11,
+            "symbols": []
+          }
+        ],
+        "frontend/src/main.jsx": [
+          {
+            "path": "frontend/src/index.css",
+            "batchIndex": 11,
+            "symbols": []
+          }
+        ],
+        "frontend/src/pages/Login.jsx": [
+          {
+            "path": "frontend/src/pages/Login.css",
+            "batchIndex": 11,
+            "symbols": []
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 3,
+      "files": [
+        {
+          "path": "backend/internal/config/config.go",
+          "language": "go",
+          "sizeLines": 46,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/audit_handler.go",
+          "language": "go",
+          "sizeLines": 95,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/config_handler.go",
+          "language": "go",
+          "sizeLines": 54,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/handler/health_handler.go",
+          "language": "go",
+          "sizeLines": 29,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/middleware/auth.go",
+          "language": "go",
+          "sizeLines": 85,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/middleware/cors.go",
+          "language": "go",
+          "sizeLines": 28,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/middleware/logger.go",
+          "language": "go",
+          "sizeLines": 56,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/internal/router/router.go",
+          "language": "go",
+          "sizeLines": 128,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/pkg/cache/cache.go",
+          "language": "go",
+          "sizeLines": 39,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "backend/internal/config/config.go": [],
+        "backend/internal/handler/audit_handler.go": [
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go"
+        ],
+        "backend/internal/handler/config_handler.go": [
+          "backend/internal/config/config.go"
+        ],
+        "backend/internal/handler/health_handler.go": [
+          "backend/internal/config/config.go"
+        ],
+        "backend/internal/middleware/auth.go": [
+          "backend/internal/handler/admin_handler.go",
+          "backend/internal/handler/audit_handler.go",
+          "backend/internal/handler/auth_handler.go",
+          "backend/internal/handler/config_handler.go",
+          "backend/internal/handler/health_handler.go",
+          "backend/internal/handler/play_handler.go",
+          "backend/internal/handler/proxy_handler.go",
+          "backend/internal/handler/sso_admin_handler.go",
+          "backend/internal/handler/sso_handler.go",
+          "backend/internal/handler/user_handler.go"
+        ],
+        "backend/internal/middleware/cors.go": [
+          "backend/internal/config/config.go"
+        ],
+        "backend/internal/middleware/logger.go": [],
+        "backend/internal/router/router.go": [
+          "backend/internal/config/config.go",
+          "backend/internal/handler/admin_handler.go",
+          "backend/internal/handler/audit_handler.go",
+          "backend/internal/handler/auth_handler.go",
+          "backend/internal/handler/config_handler.go",
+          "backend/internal/handler/health_handler.go",
+          "backend/internal/handler/play_handler.go",
+          "backend/internal/handler/proxy_handler.go",
+          "backend/internal/handler/sso_admin_handler.go",
+          "backend/internal/handler/sso_handler.go",
+          "backend/internal/handler/user_handler.go",
+          "backend/internal/middleware/auth.go",
+          "backend/internal/middleware/cors.go",
+          "backend/internal/middleware/logger.go",
+          "backend/internal/repository/audit_repository.go",
+          "backend/internal/repository/config_repository.go",
+          "backend/internal/repository/dvr_repository.go",
+          "backend/internal/repository/sso_repository.go",
+          "backend/internal/repository/user_repository.go",
+          "backend/internal/service/auth_service.go",
+          "backend/internal/service/config_service.go",
+          "backend/internal/service/dvr_service.go",
+          "backend/internal/service/proxy_service.go",
+          "backend/internal/service/sso_service.go",
+          "backend/pkg/cache/cache.go"
+        ],
+        "backend/pkg/cache/cache.go": []
+      },
+      "neighborMap": {
+        "backend/internal/config/config.go": [
+          {
+            "path": "backend/cmd/server/main.go",
+            "batchIndex": 1,
+            "symbols": []
+          },
+          {
+            "path": "backend/internal/repository/config_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ConfigRepository",
+              "NewConfigRepository",
+              "GetDefaultConfig",
+              "GetConfig",
+              "SaveConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/service/config_service.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ConfigService",
+              "NewConfigService",
+              "GetConfig",
+              "UpdateConfig",
+              "GetDVRServers",
+              "UpdateDVRServers",
+              "ReloadConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/service/dvr_service.go",
+            "batchIndex": 1,
+            "symbols": [
+              "DVRService",
+              "NewDVRService",
+              "UpdateConfig",
+              "DVRQueryResult",
+              "FindRecording"
+            ]
+          },
+          {
+            "path": "backend/internal/service/proxy_service.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ProxyService",
+              "NewProxyService",
+              "ProxyStream"
+            ]
+          }
+        ],
+        "backend/internal/handler/audit_handler.go": [
+          {
+            "path": "backend/internal/repository/audit_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "AuditEntry",
+              "AuditRepository",
+              "NewAuditRepository",
+              "Insert",
+              "List",
+              "DeleteOlderThan"
+            ]
+          },
+          {
+            "path": "backend/internal/repository/config_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ConfigRepository",
+              "NewConfigRepository",
+              "GetDefaultConfig",
+              "GetConfig",
+              "SaveConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/repository/dvr_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "DVRRepository",
+              "NewDVRRepository",
+              "GetAll",
+              "Save",
+              "Add",
+              "Delete"
+            ]
+          },
+          {
+            "path": "backend/internal/repository/sso_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "SSOProvider",
+              "SSORepository",
+              "NewSSORepository",
+              "List",
+              "ListEnabled",
+              "GetByID",
+              "Create",
+              "Update",
+              "SetEnabled",
+              "Delete"
+            ]
+          },
+          {
+            "path": "backend/internal/repository/user_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "User",
+              "UserRepository",
+              "NewUserRepository",
+              "GetByUsername",
+              "GetByID",
+              "List",
+              "Create",
+              "CreateSSO",
+              "UpdatePassword",
+              "UpdateRole",
+              "Delete",
+              "Count"
+            ]
+          }
+        ],
+        "backend/internal/middleware/auth.go": [
+          {
+            "path": "backend/internal/handler/admin_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "AdminHandler",
+              "NewAdminHandler",
+              "GetDVRServersResponse",
+              "UpdateDVRServersRequest",
+              "UpdateDVRServersResponse",
+              "GetDVRServers",
+              "UpdateDVRServers",
+              "GetConfig",
+              "UpdateConfigRequest",
+              "UpdateConfig",
+              "ReloadConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/auth_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "AuthHandler",
+              "NewAuthHandler",
+              "LoginRequest",
+              "LoginResponse",
+              "UserInfo",
+              "VerifyResponse",
+              "Claims",
+              "Login",
+              "Me",
+              "ChangePasswordRequest",
+              "ChangePassword",
+              "Logout",
+              "VerifyToken"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/play_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "PlayHandler",
+              "NewPlayHandler",
+              "PlayRequest",
+              "PlayResponse",
+              "BatchPlayResponse",
+              "RecordingResult",
+              "Handle",
+              "HandleBatch"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/proxy_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ProxyHandler",
+              "NewProxyHandler",
+              "Handle"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/sso_admin_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "SSOAdminHandler",
+              "NewSSOAdminHandler",
+              "SSOProviderRequest",
+              "List",
+              "Create",
+              "Update",
+              "Toggle",
+              "Delete"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/sso_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "SSOHandler",
+              "NewSSOHandler",
+              "ListProviders",
+              "OIDCLogin",
+              "OIDCCallback"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/user_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "UserHandler",
+              "NewUserHandler",
+              "CreateUserRequest",
+              "UpdateRoleRequest",
+              "ResetPasswordRequest",
+              "List",
+              "Create",
+              "UpdateRole",
+              "ResetPassword",
+              "Delete"
+            ]
+          }
+        ],
+        "backend/internal/router/router.go": [
+          {
+            "path": "backend/internal/handler/admin_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "AdminHandler",
+              "NewAdminHandler",
+              "GetDVRServersResponse",
+              "UpdateDVRServersRequest",
+              "UpdateDVRServersResponse",
+              "GetDVRServers",
+              "UpdateDVRServers",
+              "GetConfig",
+              "UpdateConfigRequest",
+              "UpdateConfig",
+              "ReloadConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/auth_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "AuthHandler",
+              "NewAuthHandler",
+              "LoginRequest",
+              "LoginResponse",
+              "UserInfo",
+              "VerifyResponse",
+              "Claims",
+              "Login",
+              "Me",
+              "ChangePasswordRequest",
+              "ChangePassword",
+              "Logout",
+              "VerifyToken"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/play_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "PlayHandler",
+              "NewPlayHandler",
+              "PlayRequest",
+              "PlayResponse",
+              "BatchPlayResponse",
+              "RecordingResult",
+              "Handle",
+              "HandleBatch"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/proxy_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ProxyHandler",
+              "NewProxyHandler",
+              "Handle"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/sso_admin_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "SSOAdminHandler",
+              "NewSSOAdminHandler",
+              "SSOProviderRequest",
+              "List",
+              "Create",
+              "Update",
+              "Toggle",
+              "Delete"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/sso_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "SSOHandler",
+              "NewSSOHandler",
+              "ListProviders",
+              "OIDCLogin",
+              "OIDCCallback"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/user_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "UserHandler",
+              "NewUserHandler",
+              "CreateUserRequest",
+              "UpdateRoleRequest",
+              "ResetPasswordRequest",
+              "List",
+              "Create",
+              "UpdateRole",
+              "ResetPassword",
+              "Delete"
+            ]
+          },
+          {
+            "path": "backend/internal/repository/audit_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "AuditEntry",
+              "AuditRepository",
+              "NewAuditRepository",
+              "Insert",
+              "List",
+              "DeleteOlderThan"
+            ]
+          },
+          {
+            "path": "backend/internal/repository/config_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ConfigRepository",
+              "NewConfigRepository",
+              "GetDefaultConfig",
+              "GetConfig",
+              "SaveConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/repository/dvr_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "DVRRepository",
+              "NewDVRRepository",
+              "GetAll",
+              "Save",
+              "Add",
+              "Delete"
+            ]
+          },
+          {
+            "path": "backend/internal/repository/sso_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "SSOProvider",
+              "SSORepository",
+              "NewSSORepository",
+              "List",
+              "ListEnabled",
+              "GetByID",
+              "Create",
+              "Update",
+              "SetEnabled",
+              "Delete"
+            ]
+          },
+          {
+            "path": "backend/internal/repository/user_repository.go",
+            "batchIndex": 1,
+            "symbols": [
+              "User",
+              "UserRepository",
+              "NewUserRepository",
+              "GetByUsername",
+              "GetByID",
+              "List",
+              "Create",
+              "CreateSSO",
+              "UpdatePassword",
+              "UpdateRole",
+              "Delete",
+              "Count"
+            ]
+          },
+          {
+            "path": "backend/internal/service/auth_service.go",
+            "batchIndex": 1,
+            "symbols": [
+              "User",
+              "AuthService",
+              "NewAuthService",
+              "Authenticate",
+              "FindOrCreateSSOUser",
+              "GetUser",
+              "GetUserByID",
+              "ChangePassword",
+              "ListUsers",
+              "CreateUser",
+              "ResetPassword",
+              "UpdateUserRole",
+              "DeleteUser"
+            ]
+          },
+          {
+            "path": "backend/internal/service/config_service.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ConfigService",
+              "NewConfigService",
+              "GetConfig",
+              "UpdateConfig",
+              "GetDVRServers",
+              "UpdateDVRServers",
+              "ReloadConfig"
+            ]
+          },
+          {
+            "path": "backend/internal/service/dvr_service.go",
+            "batchIndex": 1,
+            "symbols": [
+              "DVRService",
+              "NewDVRService",
+              "UpdateConfig",
+              "DVRQueryResult",
+              "FindRecording"
+            ]
+          },
+          {
+            "path": "backend/internal/service/proxy_service.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ProxyService",
+              "NewProxyService",
+              "ProxyStream"
+            ]
+          },
+          {
+            "path": "backend/internal/service/sso_service.go",
+            "batchIndex": 1,
+            "symbols": [
+              "OIDCConfig",
+              "SSOProviderInfo",
+              "SSOService",
+              "NewSSOService",
+              "Reload",
+              "ListProviders",
+              "BuildOIDCAuthURL",
+              "ExchangeOIDC",
+              "GenerateState"
+            ]
+          },
+          {
+            "path": "backend/cmd/server/main.go",
+            "batchIndex": 1,
+            "symbols": []
+          }
+        ],
+        "backend/pkg/cache/cache.go": [
+          {
+            "path": "backend/internal/handler/play_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "PlayHandler",
+              "NewPlayHandler",
+              "PlayRequest",
+              "PlayResponse",
+              "BatchPlayResponse",
+              "RecordingResult",
+              "Handle",
+              "HandleBatch"
+            ]
+          },
+          {
+            "path": "backend/internal/handler/proxy_handler.go",
+            "batchIndex": 1,
+            "symbols": [
+              "ProxyHandler",
+              "NewProxyHandler",
+              "Handle"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 4,
+      "files": [
+        {
+          "path": "backend/Dockerfile",
+          "language": "dockerfile",
+          "sizeLines": 55,
+          "fileCategory": "infra"
+        }
+      ],
+      "batchImportData": {
+        "backend/Dockerfile": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 5,
+      "files": [
+        {
+          "path": "frontend/Dockerfile",
+          "language": "dockerfile",
+          "sizeLines": 34,
+          "fileCategory": "infra"
+        }
+      ],
+      "batchImportData": {
+        "frontend/Dockerfile": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 6,
+      "files": [
+        {
+          "path": ".github/workflows/build-and-push.yml",
+          "language": "yaml",
+          "sizeLines": 144,
+          "fileCategory": "infra"
+        }
+      ],
+      "batchImportData": {
+        ".github/workflows/build-and-push.yml": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 7,
+      "files": [
+        {
+          "path": ".dockerignore",
+          "language": "unknown",
+          "sizeLines": 25,
+          "fileCategory": "infra"
+        },
+        {
+          "path": ".rubocop.yml",
+          "language": "yaml",
+          "sizeLines": 281,
+          "fileCategory": "config"
+        },
+        {
+          "path": "AGENTS.md",
+          "language": "markdown",
+          "sizeLines": 17,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "NGINX.md",
+          "language": "markdown",
+          "sizeLines": 404,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "sizeLines": 541,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "deploy.sh",
+          "language": "shell",
+          "sizeLines": 7,
+          "fileCategory": "script"
+        },
+        {
+          "path": "docker-compose.yml",
+          "language": "yaml",
+          "sizeLines": 58,
+          "fileCategory": "infra"
+        }
+      ],
+      "batchImportData": {
+        ".dockerignore": [],
+        ".rubocop.yml": [],
+        "AGENTS.md": [],
+        "NGINX.md": [],
+        "README.md": [],
+        "deploy.sh": [],
+        "docker-compose.yml": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 8,
+      "files": [
+        {
+          "path": "backend/README.md",
+          "language": "markdown",
+          "sizeLines": 53,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "backend/go.mod",
+          "language": "mod",
+          "sizeLines": 50,
+          "fileCategory": "config"
+        },
+        {
+          "path": "backend/go.sum",
+          "language": "sum",
+          "sizeLines": 154,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        "backend/README.md": [],
+        "backend/go.mod": [],
+        "backend/go.sum": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 9,
+      "files": [
+        {
+          "path": "frontend/README.md",
+          "language": "markdown",
+          "sizeLines": 46,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "frontend/index.html",
+          "language": "html",
+          "sizeLines": 13,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "frontend/package.json",
+          "language": "json",
+          "sizeLines": 30,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        "frontend/README.md": [],
+        "frontend/index.html": [],
+        "frontend/package.json": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 10,
+      "files": [
+        {
+          "path": "openspec/changes/add-admin-audit-query/design.md",
+          "language": "markdown",
+          "sizeLines": 33,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "openspec/changes/add-admin-audit-query/proposal.md",
+          "language": "markdown",
+          "sizeLines": 19,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "openspec/changes/add-admin-audit-query/tasks.md",
+          "language": "markdown",
+          "sizeLines": 26,
+          "fileCategory": "docs"
+        }
+      ],
+      "batchImportData": {
+        "openspec/changes/add-admin-audit-query/design.md": [],
+        "openspec/changes/add-admin-audit-query/proposal.md": [],
+        "openspec/changes/add-admin-audit-query/tasks.md": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 11,
+      "files": [
+        {
+          "path": ".shared/ui-ux-pro-max/scripts/core.py",
+          "language": "python",
+          "sizeLines": 245,
+          "fileCategory": "code"
+        },
+        {
+          "path": ".shared/ui-ux-pro-max/scripts/search.py",
+          "language": "python",
+          "sizeLines": 61,
+          "fileCategory": "code"
+        },
+        {
+          "path": "backend/server",
+          "language": "unknown",
+          "sizeLines": 81940,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/nginx.conf",
+          "language": "conf",
+          "sizeLines": 64,
+          "fileCategory": "code"
+        },
+        {
+          "path": "frontend/src/components/Layout.css",
+          "language": "css",
+          "sizeLines": 252,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "frontend/src/index.css",
+          "language": "css",
+          "sizeLines": 248,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "frontend/src/pages/Login.css",
+          "language": "css",
+          "sizeLines": 566,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "frontend/vite.config.js",
+          "language": "javascript",
+          "sizeLines": 33,
+          "fileCategory": "code"
+        },
+        {
+          "path": "nginx.conf",
+          "language": "conf",
+          "sizeLines": 227,
+          "fileCategory": "code"
+        },
+        {
+          "path": "openspec/AGENTS.md",
+          "language": "markdown",
+          "sizeLines": 456,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "openspec/changes/add-admin-audit-query/specs/admin-audit/spec.md",
+          "language": "markdown",
+          "sizeLines": 82,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "openspec/project.md",
+          "language": "markdown",
+          "sizeLines": 31,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "push.rb",
+          "language": "ruby",
+          "sizeLines": 8,
+          "fileCategory": "code"
+        },
+        {
+          "path": "Rakefile",
+          "language": "unknown",
+          "sizeLines": 20,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        ".shared/ui-ux-pro-max/scripts/core.py": [],
+        ".shared/ui-ux-pro-max/scripts/search.py": [
+          ".shared/ui-ux-pro-max/scripts/core.py"
+        ],
+        "backend/server": [],
+        "frontend/nginx.conf": [],
+        "frontend/src/components/Layout.css": [],
+        "frontend/src/index.css": [],
+        "frontend/src/pages/Login.css": [],
+        "frontend/vite.config.js": [],
+        "nginx.conf": [],
+        "openspec/AGENTS.md": [],
+        "openspec/changes/add-admin-audit-query/specs/admin-audit/spec.md": [],
+        "openspec/project.md": [],
+        "push.rb": [],
+        "Rakefile": []
+      },
+      "neighborMap": {
+        "frontend/src/components/Layout.css": [
+          {
+            "path": "frontend/src/components/Layout.jsx",
+            "batchIndex": 2,
+            "symbols": []
+          }
+        ],
+        "frontend/src/index.css": [
+          {
+            "path": "frontend/src/main.jsx",
+            "batchIndex": 2,
+            "symbols": []
+          }
+        ],
+        "frontend/src/pages/Login.css": [
+          {
+            "path": "frontend/src/pages/Login.jsx",
+            "batchIndex": 2,
+            "symbols": []
+          }
+        ]
+      }
+    }
+  ]
+}

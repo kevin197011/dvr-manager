@@ -1,0 +1,311 @@
+{
+  "scriptCompleted": true,
+  "stats": {
+    "filesScanned": 78,
+    "filesWithImports": 38,
+    "totalEdges": 185
+  },
+  "importMap": {
+    ".dockerignore": [],
+    ".github/workflows/build-and-push.yml": [],
+    ".rubocop.yml": [],
+    ".shared/ui-ux-pro-max/scripts/core.py": [],
+    ".shared/ui-ux-pro-max/scripts/search.py": [
+      ".shared/ui-ux-pro-max/scripts/core.py"
+    ],
+    "AGENTS.md": [],
+    "backend/cmd/server/main.go": [
+      "backend/internal/config/config.go",
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go",
+      "backend/internal/router/router.go",
+      "backend/pkg/db/db.go"
+    ],
+    "backend/Dockerfile": [],
+    "backend/go.mod": [],
+    "backend/go.sum": [],
+    "backend/internal/config/config.go": [],
+    "backend/internal/handler/admin_handler.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go",
+      "backend/internal/service/auth_service.go",
+      "backend/internal/service/config_service.go",
+      "backend/internal/service/dvr_service.go",
+      "backend/internal/service/proxy_service.go",
+      "backend/internal/service/sso_service.go"
+    ],
+    "backend/internal/handler/audit_handler.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go"
+    ],
+    "backend/internal/handler/auth_handler.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go",
+      "backend/internal/service/auth_service.go",
+      "backend/internal/service/config_service.go",
+      "backend/internal/service/dvr_service.go",
+      "backend/internal/service/proxy_service.go",
+      "backend/internal/service/sso_service.go"
+    ],
+    "backend/internal/handler/config_handler.go": [
+      "backend/internal/config/config.go"
+    ],
+    "backend/internal/handler/health_handler.go": [
+      "backend/internal/config/config.go"
+    ],
+    "backend/internal/handler/play_handler.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go",
+      "backend/internal/service/auth_service.go",
+      "backend/internal/service/config_service.go",
+      "backend/internal/service/dvr_service.go",
+      "backend/internal/service/proxy_service.go",
+      "backend/internal/service/sso_service.go",
+      "backend/pkg/cache/cache.go"
+    ],
+    "backend/internal/handler/proxy_handler.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go",
+      "backend/internal/service/auth_service.go",
+      "backend/internal/service/config_service.go",
+      "backend/internal/service/dvr_service.go",
+      "backend/internal/service/proxy_service.go",
+      "backend/internal/service/sso_service.go",
+      "backend/pkg/cache/cache.go"
+    ],
+    "backend/internal/handler/sso_admin_handler.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go",
+      "backend/internal/service/auth_service.go",
+      "backend/internal/service/config_service.go",
+      "backend/internal/service/dvr_service.go",
+      "backend/internal/service/proxy_service.go",
+      "backend/internal/service/sso_service.go"
+    ],
+    "backend/internal/handler/sso_handler.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go",
+      "backend/internal/service/auth_service.go",
+      "backend/internal/service/config_service.go",
+      "backend/internal/service/dvr_service.go",
+      "backend/internal/service/proxy_service.go",
+      "backend/internal/service/sso_service.go"
+    ],
+    "backend/internal/handler/user_handler.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go",
+      "backend/internal/service/auth_service.go",
+      "backend/internal/service/config_service.go",
+      "backend/internal/service/dvr_service.go",
+      "backend/internal/service/proxy_service.go",
+      "backend/internal/service/sso_service.go"
+    ],
+    "backend/internal/middleware/auth.go": [
+      "backend/internal/handler/admin_handler.go",
+      "backend/internal/handler/audit_handler.go",
+      "backend/internal/handler/auth_handler.go",
+      "backend/internal/handler/config_handler.go",
+      "backend/internal/handler/health_handler.go",
+      "backend/internal/handler/play_handler.go",
+      "backend/internal/handler/proxy_handler.go",
+      "backend/internal/handler/sso_admin_handler.go",
+      "backend/internal/handler/sso_handler.go",
+      "backend/internal/handler/user_handler.go"
+    ],
+    "backend/internal/middleware/cors.go": [
+      "backend/internal/config/config.go"
+    ],
+    "backend/internal/middleware/logger.go": [],
+    "backend/internal/repository/audit_repository.go": [
+      "backend/pkg/db/db.go"
+    ],
+    "backend/internal/repository/config_repository.go": [
+      "backend/internal/config/config.go",
+      "backend/pkg/db/db.go"
+    ],
+    "backend/internal/repository/dvr_repository.go": [
+      "backend/pkg/db/db.go"
+    ],
+    "backend/internal/repository/sso_repository.go": [
+      "backend/pkg/db/db.go"
+    ],
+    "backend/internal/repository/user_repository.go": [
+      "backend/pkg/db/db.go"
+    ],
+    "backend/internal/router/router.go": [
+      "backend/internal/config/config.go",
+      "backend/internal/handler/admin_handler.go",
+      "backend/internal/handler/audit_handler.go",
+      "backend/internal/handler/auth_handler.go",
+      "backend/internal/handler/config_handler.go",
+      "backend/internal/handler/health_handler.go",
+      "backend/internal/handler/play_handler.go",
+      "backend/internal/handler/proxy_handler.go",
+      "backend/internal/handler/sso_admin_handler.go",
+      "backend/internal/handler/sso_handler.go",
+      "backend/internal/handler/user_handler.go",
+      "backend/internal/middleware/auth.go",
+      "backend/internal/middleware/cors.go",
+      "backend/internal/middleware/logger.go",
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go",
+      "backend/internal/service/auth_service.go",
+      "backend/internal/service/config_service.go",
+      "backend/internal/service/dvr_service.go",
+      "backend/internal/service/proxy_service.go",
+      "backend/internal/service/sso_service.go",
+      "backend/pkg/cache/cache.go"
+    ],
+    "backend/internal/service/auth_service.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go"
+    ],
+    "backend/internal/service/config_service.go": [
+      "backend/internal/config/config.go",
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go"
+    ],
+    "backend/internal/service/dvr_service.go": [
+      "backend/internal/config/config.go",
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go"
+    ],
+    "backend/internal/service/proxy_service.go": [
+      "backend/internal/config/config.go"
+    ],
+    "backend/internal/service/sso_service.go": [
+      "backend/internal/repository/audit_repository.go",
+      "backend/internal/repository/config_repository.go",
+      "backend/internal/repository/dvr_repository.go",
+      "backend/internal/repository/sso_repository.go",
+      "backend/internal/repository/user_repository.go"
+    ],
+    "backend/pkg/cache/cache.go": [],
+    "backend/pkg/db/db.go": [],
+    "backend/README.md": [],
+    "backend/server": [],
+    "deploy.sh": [],
+    "docker-compose.yml": [],
+    "frontend/Dockerfile": [],
+    "frontend/index.html": [],
+    "frontend/nginx.conf": [],
+    "frontend/package.json": [],
+    "frontend/README.md": [],
+    "frontend/src/App.jsx": [
+      "frontend/src/components/AdminRoute.jsx",
+      "frontend/src/components/Layout.jsx",
+      "frontend/src/components/ProtectedRoute.jsx",
+      "frontend/src/pages/Admin.jsx",
+      "frontend/src/pages/Audit.jsx",
+      "frontend/src/pages/Home.jsx",
+      "frontend/src/pages/Login.jsx",
+      "frontend/src/pages/SsoCallback.jsx",
+      "frontend/src/pages/SsoConfig.jsx",
+      "frontend/src/pages/Users.jsx"
+    ],
+    "frontend/src/components/AdminRoute.jsx": [
+      "frontend/src/store/authStore.js"
+    ],
+    "frontend/src/components/Layout.css": [],
+    "frontend/src/components/Layout.jsx": [
+      "frontend/src/components/Layout.css",
+      "frontend/src/services/authService.js",
+      "frontend/src/store/authStore.js",
+      "frontend/src/store/themeStore.js"
+    ],
+    "frontend/src/components/ProtectedRoute.jsx": [
+      "frontend/src/store/authStore.js"
+    ],
+    "frontend/src/components/VideoPlayer.jsx": [],
+    "frontend/src/config/theme.js": [],
+    "frontend/src/index.css": [],
+    "frontend/src/main.jsx": [
+      "frontend/src/App.jsx",
+      "frontend/src/config/theme.js",
+      "frontend/src/index.css",
+      "frontend/src/store/themeStore.js"
+    ],
+    "frontend/src/pages/Admin.jsx": [
+      "frontend/src/services/authService.js"
+    ],
+    "frontend/src/pages/Audit.jsx": [
+      "frontend/src/services/authService.js"
+    ],
+    "frontend/src/pages/Home.jsx": [
+      "frontend/src/components/VideoPlayer.jsx",
+      "frontend/src/services/authService.js"
+    ],
+    "frontend/src/pages/Login.css": [],
+    "frontend/src/pages/Login.jsx": [
+      "frontend/src/pages/Login.css",
+      "frontend/src/services/authService.js",
+      "frontend/src/store/authStore.js"
+    ],
+    "frontend/src/pages/SsoCallback.jsx": [
+      "frontend/src/store/authStore.js"
+    ],
+    "frontend/src/pages/SsoConfig.jsx": [
+      "frontend/src/services/authService.js"
+    ],
+    "frontend/src/pages/Users.jsx": [
+      "frontend/src/services/authService.js",
+      "frontend/src/store/authStore.js"
+    ],
+    "frontend/src/services/authService.js": [],
+    "frontend/src/store/authStore.js": [
+      "frontend/src/services/authService.js"
+    ],
+    "frontend/src/store/themeStore.js": [],
+    "frontend/vite.config.js": [],
+    "nginx.conf": [],
+    "NGINX.md": [],
+    "openspec/AGENTS.md": [],
+    "openspec/changes/add-admin-audit-query/design.md": [],
+    "openspec/changes/add-admin-audit-query/proposal.md": [],
+    "openspec/changes/add-admin-audit-query/specs/admin-audit/spec.md": [],
+    "openspec/changes/add-admin-audit-query/tasks.md": [],
+    "openspec/project.md": [],
+    "push.rb": [],
+    "Rakefile": [],
+    "README.md": []
+  }
+}
