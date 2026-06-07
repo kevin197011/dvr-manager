@@ -13,8 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// NewRouter 创建新的路由
-func NewRouter(cfg *config.Config) *gin.Engine {
+// NewRouter 创建新的路由；cacheTTLDays 为录像 URL 缓存保留天数（0 表示默认 30 天）
+func NewRouter(cfg *config.Config, cacheTTLDays int) *gin.Engine {
 	// 设置 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
 
@@ -32,9 +32,10 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	auditRepo := repository.NewAuditRepository()
 	userRepo := repository.NewUserRepository()
 	ssoRepo := repository.NewSSORepository()
+	recordingCacheRepo := repository.NewRecordingCacheRepository()
 
 	// 初始化服务
-	cacheInstance := cache.NewMemoryCache()
+	cacheInstance := cache.NewSQLiteCache(recordingCacheRepo, cacheTTLDays)
 	dvrService := service.NewDVRService(cfg, dvrRepo)
 	proxyService := service.NewProxyService(cfg)
 	configService := service.NewConfigService(configRepo, dvrRepo)

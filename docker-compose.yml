@@ -19,6 +19,7 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
       - USER_USERNAME=${USER_USERNAME:-user}
       - USER_PASSWORD=${USER_PASSWORD:-user123}
+      - RECORD_CACHE_TTL_DAYS=${RECORD_CACHE_TTL_DAYS:-30}
     networks:
       - dvr-network
     healthcheck:

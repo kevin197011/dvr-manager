@@ -121,6 +121,13 @@ func createTables() error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
+		// 录像局号 → DVR 真实 URL 缓存（默认保留 30 天，由 RECORD_CACHE_TTL_DAYS 控制）
+		`CREATE TABLE IF NOT EXISTS recording_cache (
+			record_id TEXT PRIMARY KEY,
+			real_url TEXT NOT NULL,
+			created_at DATETIME NOT NULL,
+			expires_at DATETIME NOT NULL
+		)`,
 		// 兼容旧库：尝试为已存在的 users 表添加 source 列（已存在则忽略错误）
 		`ALTER TABLE users ADD COLUMN source TEXT NOT NULL DEFAULT 'local'`,
 		// 创建索引
@@ -130,6 +137,7 @@ func createTables() error {
 		`CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action)`,
 		`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
 		`CREATE INDEX IF NOT EXISTS idx_sso_providers_enabled ON sso_providers(enabled)`,
+		`CREATE INDEX IF NOT EXISTS idx_recording_cache_expires_at ON recording_cache(expires_at)`,
 	}
 
 	for _, query := range queries {

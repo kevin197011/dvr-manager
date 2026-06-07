@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"dvr-vod-system/internal/config"
@@ -48,6 +49,16 @@ func main() {
 	// 定时任务：每日午夜执行审计日志巡检（删除超过 3 个月的记录）
 	go runAuditDailyCleanup(auditRepo, auditRetentionMonths)
 
+	// 录像 URL 缓存：默认保留 30 天，可通过 RECORD_CACHE_TTL_DAYS 调整
+	cacheTTLDays := recordingCacheTTLDays()
+	recordingCacheRepo := repository.NewRecordingCacheRepository()
+	if n, err := recordingCacheRepo.DeleteExpired(time.Now()); err != nil {
+		log.Printf("[RecordingCache] startup cleanup warning: %v", err)
+	} else if n > 0 {
+		log.Printf("[RecordingCache] startup cleanup: removed %d expired entries", n)
+	}
+	go runRecordingCacheDailyCleanup(recordingCacheRepo)
+
 	// 从数据库加载配置
 	configRepo := repository.NewConfigRepository()
 	cfg, err := configRepo.GetConfig()
@@ -59,9 +70,10 @@ func main() {
 	config.SetConfig(cfg)
 
 	log.Printf("Loaded %d DVR servers from database", len(cfg.DVRServers))
+	log.Printf("Recording cache TTL: %d days (RECORD_CACHE_TTL_DAYS)", cacheTTLDays)
 
 	// 创建路由
-	r := router.NewRouter(cfg)
+	r := router.NewRouter(cfg, cacheTTLDays)
 
 	// 启动服务器
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -95,6 +107,37 @@ func runAuditDailyCleanup(auditRepo repository.AuditRepository, retentionMonths 
 			log.Printf("[Audit] daily cleanup error: %v", err)
 		} else if n > 0 {
 			log.Printf("[Audit] daily cleanup: removed %d entries older than %d months", n, retentionMonths)
+		}
+	}
+}
+
+// recordingCacheTTLDays 从环境变量读取缓存保留天数，默认 30
+func recordingCacheTTLDays() int {
+	const defaultDays = 30
+	if s := os.Getenv("RECORD_CACHE_TTL_DAYS"); s != "" {
+		if n, err := strconv.Atoi(s); err == nil && n > 0 {
+			return n
+		}
+		log.Printf("[RecordingCache] invalid RECORD_CACHE_TTL_DAYS=%q, using default %d", s, defaultDays)
+	}
+	return defaultDays
+}
+
+// runRecordingCacheDailyCleanup 每日午夜删除已过期的录像 URL 缓存
+func runRecordingCacheDailyCleanup(repo repository.RecordingCacheRepository) {
+	for {
+		now := time.Now()
+		next := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
+		d := time.Until(next)
+		if d < 0 {
+			d = 0
+		}
+		time.Sleep(d)
+		n, err := repo.DeleteExpired(time.Now())
+		if err != nil {
+			log.Printf("[RecordingCache] daily cleanup error: %v", err)
+		} else if n > 0 {
+			log.Printf("[RecordingCache] daily cleanup: removed %d expired entries", n)
 		}
 	}
 }

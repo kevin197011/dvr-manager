@@ -1,39 +1,42 @@
 package cache
 
 import (
-	"sync"
+	"log"
+
+	"dvr-vod-system/internal/repository"
 )
 
-// Cache URL 缓存接口
+// Cache URL 缓存接口（局号 → DVR 真实 URL）
 type Cache interface {
 	Set(key, value string)
 	Get(key string) (string, bool)
 }
 
-// memoryCache 内存缓存实现
-type memoryCache struct {
-	data map[string]string
-	mu   sync.RWMutex
+// sqliteCache 基于 SQLite 的持久化缓存，带 TTL
+type sqliteCache struct {
+	repo    repository.RecordingCacheRepository
+	ttlDays int
 }
 
-// NewMemoryCache 创建新的内存缓存
-func NewMemoryCache() Cache {
-	return &memoryCache{
-		data: make(map[string]string),
+// NewSQLiteCache 创建 SQLite 录像 URL 缓存；ttlDays 为条目保留天数
+func NewSQLiteCache(repo repository.RecordingCacheRepository, ttlDays int) Cache {
+	if ttlDays <= 0 {
+		ttlDays = 30
+	}
+	return &sqliteCache{
+		repo:    repo,
+		ttlDays: ttlDays,
 	}
 }
 
 // Set 设置缓存
-func (c *memoryCache) Set(key, value string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.data[key] = value
+func (c *sqliteCache) Set(key, value string) {
+	if err := c.repo.Set(key, value, c.ttlDays); err != nil {
+		log.Printf("[WARN] recording cache set failed - record_id: %s, error: %v", key, err)
+	}
 }
 
-// Get 获取缓存
-func (c *memoryCache) Get(key string) (string, bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	value, exists := c.data[key]
-	return value, exists
+// Get 获取缓存（过期条目视为未命中）
+func (c *sqliteCache) Get(key string) (string, bool) {
+	return c.repo.Get(key)
 }
