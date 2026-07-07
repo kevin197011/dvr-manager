@@ -3,7 +3,9 @@ package web
 import (
 	"embed"
 	"io/fs"
+	"mime"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +20,6 @@ func Register(r *gin.Engine) {
 	if err != nil {
 		return
 	}
-	static := http.FS(sub)
 
 	r.NoRoute(func(c *gin.Context) {
 		if c.Request.Method != http.MethodGet && c.Request.Method != http.MethodHead {
@@ -32,13 +33,27 @@ func Register(r *gin.Engine) {
 			return
 		}
 
-		file := strings.TrimPrefix(path, "/")
-		if file == "" {
-			file = "index.html"
+		name := strings.TrimPrefix(path, "/")
+		if name == "" {
+			name = "index.html"
 		}
-		if _, err := sub.Open(file); err != nil {
-			file = "index.html"
+		if _, err := sub.Open(name); err != nil {
+			name = "index.html"
 		}
-		c.FileFromFS(file, static)
+
+		data, err := fs.ReadFile(sub, name)
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		ct := mime.TypeByExtension(filepath.Ext(name))
+		if ct == "" {
+			ct = "application/octet-stream"
+		}
+		if strings.HasSuffix(name, ".html") {
+			ct = "text/html; charset=utf-8"
+		}
+		c.Data(http.StatusOK, ct, data)
 	})
 }
