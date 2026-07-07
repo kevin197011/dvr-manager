@@ -2,7 +2,7 @@
 
 | 属性 | 值 |
 |------|-----|
-| 文档版本 | 1.0.0 |
+| 文档版本 | 1.0.3 |
 | 更新日期 | 2026-07-07 |
 | 项目代号 | dvr-manager / dvr-vod-system |
 | 状态 | 已实现（As-Is 需求基线） |
@@ -104,7 +104,7 @@
 
 | 编号 | 需求 | 验收标准 |
 |------|------|----------|
-| FR-DOWNLOAD-01 | 浏览器下载 | 通过 `fetch(proxyUrl)` 获取 blob，触发 `{record_id}.mp4` 本地下载 |
+| FR-DOWNLOAD-01 | 浏览器下载 | 通过 `<a download>` 指向 `proxy_url` 触发下载，避免大文件 blob 占用内存 |
 | FR-DOWNLOAD-02 | 进度提示 | 下载中/完成/失败 message 提示 |
 
 ### 3.4 录像 URL 缓存（FR-CACHE）
@@ -136,7 +136,7 @@
 | FR-SSO-02 | 发起登录 | `GET /api/auth/sso/oidc/:id/login` 跳转 IdP，设置 state Cookie |
 | FR-SSO-03 | 回调处理 | `GET /api/auth/sso/oidc/:id/callback` 校验 state、换 token、提取用户名 |
 | FR-SSO-04 | 自动建号 | 用户名不存在则创建 `role=user` 的 SSO 用户 |
-| FR-SSO-05 | 前端回调 | 重定向 `/sso-callback?token=...`，`SsoCallback` 页写入 auth store |
+| FR-SSO-05 | 前端回调 | 重定向 `/sso-callback#token=...`（URL fragment），`SsoCallback` 页写入 auth store |
 | FR-SSO-06 | 管理 CRUD | 管理员可增删改查、启用/停用 SSO 提供商 |
 | FR-SSO-07 | OIDC 必填字段 | `issuer`, `client_id`, `client_secret`, `redirect_url` |
 | FR-SSO-08 | 用户名 Claim | 默认 `preferred_username`，可配置；回退 `email` / `sub` |
@@ -263,7 +263,7 @@
 | FR-UI-01 | 主题切换 | 支持明/暗主题（Zustand `themeStore`） |
 | FR-UI-02 | 侧边导航 | 普通用户见「录像查询」；管理员额外见管理菜单 |
 | FR-UI-03 | 用户菜单 | 修改密码、登出 |
-| FR-UI-04 | SPA 路由 | Nginx `try_files` 回退 `index.html` |
+| FR-UI-04 | SPA 路由 | Go `embed` 静态资源；未匹配 API 路径时回退 `index.html` |
 
 ---
 
@@ -276,15 +276,15 @@
 | NFR-PERF-01 | 并发查询隔离 | 每个 HTTP 请求独立 context，超时互不影响 |
 | NFR-PERF-02 | DVR 并发探测 | 多服务器 goroutine 并发 HEAD |
 | NFR-PERF-03 | 连接复用 | HTTP Transport `MaxIdleConns=100` |
-| NFR-PERF-04 | 视频代理 | `proxy_buffering off`（Nginx），流式传输 |
+| NFR-PERF-04 | 视频代理 | Go `io.Copy` 流式转发，不整文件缓冲 |
 | NFR-PERF-05 | 审计日志容量 | 默认仅保留 3 个月；启动 + 每日自动硬删除，避免 `audit_log` 堆积拖慢查询 |
 
 ### 4.2 可用性
 
 | 编号 | 需求 |
 |------|------|
-| NFR-AVAIL-01 | Docker 健康检查：backend `wget /health`，30s 间隔 |
-| NFR-AVAIL-02 | frontend 依赖 backend healthy 后启动 |
+| NFR-AVAIL-01 | Docker 健康检查：`wget /health`，30s 间隔 |
+| NFR-AVAIL-02 | 单容器部署，无前后端启动顺序依赖 |
 | NFR-AVAIL-03 | 容器 `restart: unless-stopped` |
 
 ### 4.3 可维护性
@@ -294,7 +294,7 @@
 | NFR-MAINT-01 | 分层架构：Handler → Service → Repository |
 | NFR-MAINT-02 | 配置存 SQLite，管理后台可热更新（端口除外） |
 | NFR-MAINT-03 | 结构化日志（标准 log，含 IP/编号/耗时） |
-| NFR-MAINT-04 | GitHub Actions 自动构建推送 GHCR 镜像 |
+| NFR-MAINT-04 | GitHub Actions 自动构建推送 GHCR 单镜像（前端已嵌入） |
 
 ### 4.4 兼容性
 
@@ -314,25 +314,40 @@
 |----|------|
 | 后端 | Go 1.25, Gin, JWT, go-oidc, modernc.org/sqlite |
 | 前端 | React 18, Ant Design 5, Vite 5, Zustand, Axios |
-| 部署 | Docker Compose, Nginx（前端容器内） |
-| CI | GitHub Actions → GHCR |
+| 部署 | Docker Compose 单服务；前端 `dist` 经 `go:embed` 打入二进制 |
+| CI | GitHub Actions → GHCR（`ghcr.io/<repo>`） |
 
 ### 5.2 部署拓扑
+
+生产环境为**单进程、单容器**：Go 服务同时提供 API 与 SPA 静态资源。
 
 ```
 用户浏览器
     │
     ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  frontend:80    │────▶│  backend:8080   │────▶│  DVR 服务器 ×N  │
-│  (Nginx + SPA)  │     │  (Go API)       │     │  (HEAD/GET)     │
-└─────────────────┘     └────────┬────────┘     └─────────────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │  SQLite         │
-                        │  ./data/        │
-                        └─────────────────┘
+┌─────────────────────────────────────┐     ┌─────────────────┐
+│  app:8080 (Go)                      │────▶│  DVR 服务器 ×N  │
+│  /api/* /stream/* /health  → API    │     │  (HEAD/GET)     │
+│  /*                        → SPA    │     └─────────────────┘
+└────────────────┬────────────────────┘
+                 │
+                 ▼
+        ┌─────────────────┐
+        │  SQLite         │
+        │  ./data/        │
+        └─────────────────┘
+```
+
+**本地开发**仍前后端分离：Vite dev server `:3000` 代理 `/api`、`/stream`、`/health` 到 `:8080`。
+
+**构建链路**（生产镜像 / 本地单二进制）：
+
+```
+frontend/npm run build → dist/
+        ↓
+backend/internal/web/dist/  (//go:embed)
+        ↓
+go build → 单一可执行文件
 ```
 
 ### 5.3 目录结构
@@ -347,11 +362,12 @@ dvr-manager/
 │   │   ├── middleware/          # 认证、CORS、日志
 │   │   ├── repository/          # 数据访问
 │   │   ├── router/              # 路由注册
-│   │   └── service/             # 业务逻辑
+│   │   ├── service/             # 业务逻辑
+│   │   └── web/                 # 嵌入的前端 dist（构建时生成）
 │   └── pkg/
 │       ├── cache/               # 录像 URL 缓存
 │       └── db/                  # SQLite 初始化
-├── frontend/
+├── frontend/                    # 前端源码（开发 / 构建）
 │   └── src/
 │       ├── pages/               # 页面
 │       ├── components/          # 组件
@@ -359,7 +375,9 @@ dvr-manager/
 │       └── store/               # 状态
 ├── data/                        # 运行时数据（gitignore）
 ├── docs/                        # 文档
-├── docker-compose.yml
+├── Dockerfile                   # 多阶段：Node 构建前端 + Go embed
+├── Makefile                     # make build 本地单二进制
+├── docker-compose.yml           # 单服务 app:8080
 └── deploy.sh
 ```
 
@@ -543,30 +561,41 @@ Authorization: Bearer <jwt_token>
 ### 8.2 部署命令
 
 ```bash
-# 推荐
+# 推荐（Docker 单容器）
 ./deploy.sh
 
 # 或
-docker compose up -d
+docker compose up -d --build
 
-# 本地开发
-cd backend && go run ./cmd/server
-cd frontend && npm install && npm run dev
+# 本地开发（前后端分离，热更新）
+cd backend && go run ./cmd/server          # :8080，仅 API
+cd frontend && npm install && npm run dev  # :3000，代理到 :8080
+
+# 本地单二进制（与生产一致）
+make build && ./dvr-vod-system             # :8080，API + SPA
 ```
 
 ### 8.3 端口
 
-| 服务 | 端口 |
+| 场景 | 端口 |
 |------|------|
-| frontend (Docker) | 3000 → 容器 80 |
-| backend | 8080 |
-| 可选 Nginx 反代 | 80/443 |
+| 生产 / Docker（`app` 服务） | 8080（由外层代理转发） |
+| 本地开发（Vite） | 3000（API 代理到 8080） |
 
-### 8.4 备份
+### 8.4 静态资源嵌入说明
+
+| 项 | 说明 |
+|----|------|
+| 嵌入路径 | `backend/internal/web/dist/` |
+| 实现 | `internal/web/static.go` 使用 `//go:embed dist/*` |
+| 路由 | API/stream/health 优先注册；`NoRoute` 提供静态文件与 SPA fallback |
+| 占位页 | 未执行 `make build` 时 `go run` 仅显示占位 `index.html` |
+
+### 8.5 备份
 
 定期备份 `data/dvr-manager.db`（含用户、配置、审计、缓存）。
 
-### 8.5 日志
+### 8.6 日志
 
 - 容器日志：`docker compose logs -f`
 - 日志轮转：json-file driver，max-size 10m × 3 files
@@ -589,13 +618,10 @@ cd frontend && npm install && npm run dev
 
 | 风险 | 说明 | 建议 |
 |------|------|------|
-| 录像 API 可选认证 | `/api/play`、`/stream` 未强制登录，知道编号即可访问 | 生产评估是否改为强制认证 |
+| 录像 API 可选认证 | `/api/play`、`/stream` 默认未强制登录 | 生产可设 `REQUIRE_AUTH_FOR_PLAY=true` |
 | JWT 无吊销 | 登出不清服务端 Token | 敏感环境可加快过期或加黑名单 |
 | 默认 TLS 跳过验证 | `skip_tls_verify=true` | 内网可接受；公网 DVR 应关闭 |
 | CORS 默认 `*` | 允许任意来源 | 生产限制 `allow_origins` |
-| 批量查询串行 | 批量时逐条 FindRecording，大列表慢 | 可改为并发批量 |
-| README 描述过时 | 写「串行查询」与实际并发不符 | 同步更新 README |
-| 编译产物入库 | `backend/server` 二进制 | 加入 .gitignore |
 
 ---
 
@@ -653,6 +679,7 @@ curl http://localhost:8080/api/config
 
 | 版本 | 日期 | 作者 | 变更说明 |
 |------|------|------|----------|
+| 1.0.3 | 2026-07-07 | — | 前端嵌入 Go 二进制：单容器部署；清理废弃的前端/后端 Docker 与 Nginx 配置 |
 | 1.0.2 | 2026-07-07 | — | 代码质量优化：配置热更新、JWT 抽离、批量并发、SSO fragment、可选强制播放鉴权 |
 | 1.0.1 | 2026-07-07 | — | 明确审计日志 3 个月保留 + 启动/每日自动清理；`AUDIT_RETENTION_MONTHS` |
 | 1.0.0 | 2026-07-07 | — | 基于代码库初始梳理，建立 As-Is 需求基线 |

@@ -1,6 +1,6 @@
 # DVR Manager
 
-DVR 录像点播管理系统：按编号在多台 DVR 服务器上查找录像，通过代理 URL 在线播放与下载，不暴露真实 DVR 地址。前后端分离，带用户认证与管理后台。
+DVR 录像点播管理系统：按编号在多台 DVR 服务器上查找录像，通过代理 URL 在线播放与下载，不暴露真实 DVR 地址。前端静态资源嵌入 Go 二进制，单进程部署。
 
 ## 功能
 
@@ -27,8 +27,7 @@ docker compose up -d --build
 
 | 服务 | 地址 |
 |------|------|
-| 前端 | http://localhost:3000 |
-| 后端 API | http://localhost:8080 |
+| Web（前端 + API） | http://localhost:8080 |
 
 默认账号（首次启动、用户表为空时创建）：
 
@@ -47,14 +46,21 @@ docker compose down       # 停止
 ### 本地开发
 
 ```bash
-# 后端
+# 后端 API（:8080）
 cd backend && go mod download && go run ./cmd/server
 
-# 前端（另开终端）
+# 前端热更新（另开终端，:3000，API 代理到 :8080）
 cd frontend && npm install && npm run dev
 ```
 
-前端 http://localhost:3000 ，API 自动代理到后端 :8080。
+### 本地单二进制（与生产一致）
+
+```bash
+make build    # 构建前端并嵌入 Go 二进制
+./dvr-vod-system
+```
+
+访问 http://localhost:8080 。
 
 ## 生产环境
 
@@ -68,14 +74,13 @@ cd frontend && npm install && npm run dev
 
 其他常用变量：`DATA_DIR`、`RECORD_CACHE_TTL_DAYS`（默认 30）、`AUDIT_RETENTION_MONTHS`（默认 3）、`REQUIRE_AUTH_FOR_PLAY`（默认 false，设为 true 时播放需登录）。
 
-使用 Nginx 反向代理时参考 [NGINX.md](NGINX.md)。
+对外暴露由外层反向代理（如网关 / LB）转发到 `:8080` 即可。
 
 ## 文档
 
 | 文档 | 说明 |
 |------|------|
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 完整需求、API、数据模型、架构与安全说明 |
-| [NGINX.md](NGINX.md) | Nginx 反向代理配置 |
 
 ## 许可证
 

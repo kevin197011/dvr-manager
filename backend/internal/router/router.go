@@ -7,6 +7,7 @@ import (
 	"dvr-vod-system/internal/middleware"
 	"dvr-vod-system/internal/repository"
 	"dvr-vod-system/internal/service"
+	"dvr-vod-system/internal/web"
 	"dvr-vod-system/pkg/cache"
 
 	"github.com/gin-gonic/gin"
@@ -103,6 +104,8 @@ func NewRouter(cfg *config.Config, cacheTTLDays int, jwt *auth.JWT) *gin.Engine 
 
 	r.GET("/health", healthHandler.Handle)
 	r.HEAD("/health", healthHandler.Handle)
+
+	web.Register(r)
 
 	return r
 }

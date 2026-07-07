@@ -41,6 +41,10 @@ frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 
+# 嵌入到 Go 的前端构建产物（保留占位 index.html）
+backend/internal/web/dist/*
+!backend/internal/web/dist/index.html
+
 # 后端
 backend/dvr-vod-system
 backend/*.exe

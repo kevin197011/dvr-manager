@@ -1,15 +1,13 @@
 services:
-  # 后端服务
-  backend:
+  app:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
-    container_name: dvr-vod-backend
+    container_name: dvr-vod
     restart: unless-stopped
     ports:
       - "8080:8080"
     volumes:
-      # 挂载数据目录（包含数据库文件）
       - ./data:/app/data:rw
     environment:
       - TZ=Asia/Shanghai
@@ -22,8 +20,6 @@ services:
       - RECORD_CACHE_TTL_DAYS=${RECORD_CACHE_TTL_DAYS:-30}
       - AUDIT_RETENTION_MONTHS=${AUDIT_RETENTION_MONTHS:-3}
       - REQUIRE_AUTH_FOR_PLAY=${REQUIRE_AUTH_FOR_PLAY:-false}
-    networks:
-      - dvr-network
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
       interval: 30s
@@ -35,27 +31,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-  # 前端服务
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: dvr-vod-frontend
-    restart: unless-stopped
-    ports:
-      - "3000:80"
-    depends_on:
-      backend:
-        condition: service_healthy
-    networks:
-      - dvr-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-networks:
-  dvr-network:
-    driver: bridge

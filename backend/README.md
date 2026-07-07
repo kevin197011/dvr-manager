@@ -1,53 +1,27 @@
-# DVR Manager Backend
+# Backend
 
-后端服务，基于 Go + Gin Framework，采用 Nunu 项目结构。
+Go + Gin API 服务。生产环境同时通过 `internal/web` 嵌入并提供前端静态资源。
 
-## 项目结构
-
-```
-backend/
-├── cmd/
-│   └── server/          # 应用入口
-├── internal/
-│   ├── config/          # 配置管理
-│   ├── handler/         # HTTP 处理器
-│   ├── middleware/      # 中间件
-│   ├── repository/      # 数据访问层
-│   ├── router/          # 路由
-│   └── service/         # 业务逻辑
-├── pkg/
-│   ├── cache/           # 缓存包
-│   └── db/              # 数据库包
-├── go.mod               # Go 模块
-└── go.sum               # Go 依赖
-```
-
-## 本地开发
+## 开发
 
 ```bash
-# 安装依赖
 go mod download
-
-# 运行服务器
-go run ./cmd/server
-
-# 编译
-go build -o dvr-vod-system ./cmd/server
+go run ./cmd/server   # :8080，仅 API（无完整前端，见 internal/web/dist 占位页）
 ```
+
+## 生产构建
+
+在仓库根目录执行：
+
+```bash
+make build          # 构建前端 → embed → ./dvr-vod-system
+```
+
+或 `docker compose up -d --build`（根目录 `Dockerfile` 多阶段构建）。
 
 ## 数据目录
 
-- **本地开发**: `../data` (相对于 backend 目录)
-- **Docker 环境**: `/app/data` (通过环境变量 `DATA_DIR` 配置)
+- 本地：`../data`
+- Docker：`/app/data`（`DATA_DIR`）
 
-## API 接口
-
-- `GET /api/config` - 获取配置信息
-- `POST /api/play` - 播放录像
-- `GET /api/play` - 播放录像（GET）
-- `GET /api/admin/config` - 获取完整配置
-- `GET /api/admin/dvr-servers` - 获取 DVR 服务器列表
-- `POST /api/admin/dvr-servers` - 更新 DVR 服务器列表
-- `POST /api/admin/reload` - 重新加载配置
-- `GET /stream/:filename` - 视频流代理
-- `GET /health` - 健康检查
+完整 API 与架构见 [docs/REQUIREMENTS.md](../docs/REQUIREMENTS.md)。

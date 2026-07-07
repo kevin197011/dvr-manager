@@ -1,46 +1,16 @@
-# DVR Manager Frontend
+# Frontend
 
-前端应用，使用 Vite 构建。
+React + Vite 前端源码。生产构建产物由根目录 `Makefile` 复制到 `backend/internal/web/dist/` 并嵌入 Go 二进制。
 
 ## 开发
 
 ```bash
-# 安装依赖
 npm install
-
-# 启动开发服务器
-npm run dev
+npm run dev   # http://localhost:3000，/api /stream /health 代理到 :8080
 ```
-
-开发服务器运行在 `http://localhost:3000`，API 请求会自动代理到后端 `http://localhost:8080`。
 
 ## 构建
 
 ```bash
-# 构建生产版本
-npm run build
-```
-
-构建产物输出到 `dist/` 目录。
-
-## 预览
-
-```bash
-# 预览构建结果
-npm run preview
-```
-
-## 项目结构
-
-```
-frontend/
-├── src/           # 源代码
-│   ├── index.html      # 主页面
-│   └── admin.html      # 管理后台
-├── public/        # 静态资源
-│   └── favicon.*  # 图标文件
-├── dist/          # 构建产物（不提交到 Git）
-├── package.json   # 依赖配置
-├── vite.config.js # Vite 配置
-└── Dockerfile     # Docker 构建文件
+npm run build   # 输出 dist/；通常通过根目录 make build 一并处理
 ```
