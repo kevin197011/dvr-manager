@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"dvr-vod-system/internal/audit"
 	"dvr-vod-system/internal/repository"
 
 	"github.com/gin-gonic/gin"
@@ -79,10 +80,9 @@ func (h *AuditHandler) GetAudit(c *gin.Context) {
 	})
 }
 
-// Cleanup 清理超过 3 个月的审计记录（仅管理员）
+// Cleanup 清理超过保留期的审计记录（仅管理员）
 func (h *AuditHandler) Cleanup(c *gin.Context) {
-	threeMonthsAgo := time.Now().AddDate(0, -3, 0)
-	n, err := h.auditRepo.DeleteOlderThan(threeMonthsAgo)
+	n, err := h.auditRepo.DeleteOlderThan(audit.RetentionCutoff())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error()})
 		return

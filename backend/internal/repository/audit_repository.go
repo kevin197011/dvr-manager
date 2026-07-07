@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"dvr-vod-system/internal/audit"
 	"dvr-vod-system/pkg/db"
 )
 
@@ -57,11 +58,8 @@ func (r *auditRepository) List(from, to *time.Time, action, username string, pag
 	}
 	offset := (page - 1) * pageSize
 
-	// 3 个月截止时间
-	threeMonthsAgo := time.Now().AddDate(0, -3, 0)
-
 	where := "created_at >= ?"
-	args := []interface{}{threeMonthsAgo}
+	args := []interface{}{audit.RetentionCutoff()}
 	if from != nil {
 		where += " AND created_at >= ?"
 		args = append(args, *from)

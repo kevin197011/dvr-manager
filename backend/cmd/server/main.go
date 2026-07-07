@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"dvr-vod-system/internal/audit"
 	"dvr-vod-system/internal/config"
 	"dvr-vod-system/internal/repository"
 	"dvr-vod-system/internal/router"
@@ -36,17 +37,17 @@ func main() {
 
 	log.Printf("Database initialized: %s", filepath.Join(dataDir, db.DBFileName))
 
-	// 审计日志：默认保留 3 个月，硬删除，避免数据过大影响性能
-	const auditRetentionMonths = 3
+	// 审计日志：默认保留 3 个月，硬删除；启动时 + 每日 00:00 后台清理
+	auditRetentionMonths := audit.RetentionMonths()
 	auditRepo := repository.NewAuditRepository()
-	auditCutoff := time.Now().AddDate(0, -auditRetentionMonths, 0)
-	if n, err := auditRepo.DeleteOlderThan(auditCutoff); err != nil {
+	log.Printf("Audit log retention: %d months (AUDIT_RETENTION_MONTHS); startup + daily 00:00 cleanup enabled",
+		auditRetentionMonths)
+	if n, err := auditRepo.DeleteOlderThan(audit.RetentionCutoff()); err != nil {
 		log.Printf("[Audit] startup cleanup warning: %v", err)
-	} else if n > 0 {
-		log.Printf("[Audit] startup cleanup: removed %d entries older than %d months", n, auditRetentionMonths)
+	} else {
+		log.Printf("[Audit] startup cleanup: deleted=%d cutoff_before=%s",
+			n, audit.RetentionCutoff().Format("2006-01-02"))
 	}
-
-	// 定时任务：每日午夜执行审计日志巡检（删除超过 3 个月的记录）
 	go runAuditDailyCleanup(auditRepo, auditRetentionMonths)
 
 	// 录像 URL 缓存：默认保留 30 天，可通过 RECORD_CACHE_TTL_DAYS 调整
@@ -105,8 +106,9 @@ func runAuditDailyCleanup(auditRepo repository.AuditRepository, retentionMonths 
 		n, err := auditRepo.DeleteOlderThan(cutoff)
 		if err != nil {
 			log.Printf("[Audit] daily cleanup error: %v", err)
-		} else if n > 0 {
-			log.Printf("[Audit] daily cleanup: removed %d entries older than %d months", n, retentionMonths)
+		} else {
+			log.Printf("[Audit] daily cleanup: deleted=%d retention_months=%d cutoff_before=%s",
+				n, retentionMonths, cutoff.Format("2006-01-02"))
 		}
 	}
 }
