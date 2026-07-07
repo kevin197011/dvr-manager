@@ -3,7 +3,7 @@ package cache
 import (
 	"log"
 
-	"dvr-vod-system/internal/repository"
+	"dvr-manager/internal/repository"
 )
 
 // Cache URL 缓存接口（局号 → DVR 真实 URL）

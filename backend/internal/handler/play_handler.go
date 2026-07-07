@@ -6,9 +6,9 @@ import (
 	"strings"
 	"sync"
 
-	"dvr-vod-system/internal/repository"
-	"dvr-vod-system/internal/service"
-	"dvr-vod-system/pkg/cache"
+	"dvr-manager/internal/repository"
+	"dvr-manager/internal/service"
+	"dvr-manager/pkg/cache"
 
 	"github.com/gin-gonic/gin"
 )

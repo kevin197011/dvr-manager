@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"dvr-vod-system/internal/repository"
+	"dvr-manager/internal/repository"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"

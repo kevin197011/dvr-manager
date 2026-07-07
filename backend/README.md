@@ -14,7 +14,7 @@ go run ./cmd/server   # :8080，仅 API（无完整前端，见 internal/web/dis
 在仓库根目录执行：
 
 ```bash
-make build          # 构建前端 → embed → ./dvr-vod-system
+make build          # 构建前端 → embed → ./dvr-manager
 ```
 
 或 `docker compose up -d --build`（根目录 `Dockerfile` 多阶段构建）。

@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"dvr-vod-system/internal/config"
-	"dvr-vod-system/internal/repository"
-	"dvr-vod-system/pkg/httpclient"
+	"dvr-manager/internal/config"
+	"dvr-manager/internal/repository"
+	"dvr-manager/pkg/httpclient"
 )
 
 // DVRService DVR 服务接口

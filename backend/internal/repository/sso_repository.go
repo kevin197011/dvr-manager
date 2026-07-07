@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"dvr-vod-system/pkg/db"
+	"dvr-manager/pkg/db"
 )
 
 // SSO 提供商类型常量

@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"time"
 
-	"dvr-vod-system/internal/audit"
-	"dvr-vod-system/internal/auth"
-	"dvr-vod-system/internal/config"
-	"dvr-vod-system/internal/repository"
-	"dvr-vod-system/internal/router"
-	"dvr-vod-system/pkg/db"
+	"dvr-manager/internal/audit"
+	"dvr-manager/internal/auth"
+	"dvr-manager/internal/config"
+	"dvr-manager/internal/repository"
+	"dvr-manager/internal/router"
+	"dvr-manager/pkg/db"
 )
 
 func main() {
@@ -85,7 +85,7 @@ func main() {
 	}
 
 	log.Printf("========================================")
-	log.Printf("DVR VOD System starting...")
+	log.Printf("DVR Manager starting...")
 	log.Printf("Server Address: http://localhost%s", addr)
 	log.Printf("DVR Servers: %d", len(cfg.DVRServers))
 	for i, server := range cfg.DVRServers {

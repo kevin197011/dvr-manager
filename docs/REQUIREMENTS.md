@@ -2,10 +2,10 @@
 
 | 属性 | 值 |
 |------|-----|
-| 文档版本 | 1.0.3 |
+| 文档版本 | 1.1.0 |
 | 更新日期 | 2026-07-07 |
-| 项目代号 | dvr-manager / dvr-vod-system |
-| 状态 | 已实现（As-Is 需求基线） |
+| 项目代号 | dvr-manager |
+| 状态 | 已实现（含 v1.1 Dashboard） |
 
 > 本文档基于当前代码库梳理，描述**系统实际应具备的行为**，作为后续功能迭代、缺陷修复、运维交接的需求基线。新增需求请在本文件追加变更记录。
 
@@ -28,7 +28,8 @@
 3. 支持多 DVR 服务器并发探测，先命中先返回；
 4. 提供用户认证、角色权限、管理后台；
 5. 支持 OIDC 单点登录（可选）；
-6. 记录关键操作审计日志。
+6. 记录关键操作审计日志；
+7. **（v1.1）** 为管理员提供使用统计 Dashboard，掌握查询与播放调用量及日趋势。
 
 ### 1.3 非目标（当前版本不做）
 
@@ -36,7 +37,8 @@
 - 细粒度 RBAC（仅 `admin` / `user` 两角色）；
 - JWT 服务端吊销（登出为客户端删除 Token）；
 - 多租户隔离；
-- SAML / LDAP 等非 OIDC 协议（仅 OIDC）。
+- SAML / LDAP 等非 OIDC 协议（仅 OIDC）；
+- Dashboard v1.1 不做独立埋点库 / Prometheus / 小时级实时大屏（见 §3.10）。
 
 ---
 
@@ -44,7 +46,7 @@
 
 | 角色 | 标识 | 权限范围 |
 |------|------|----------|
-| 管理员 | `admin` | 录像查询、播放、下载；系统配置；DVR 服务器管理；用户管理；SSO 配置；审计日志查看 |
+| 管理员 | `admin` | 录像查询、播放、下载；**使用统计 Dashboard**；系统配置；DVR 服务器管理；用户管理；SSO 配置；审计日志查看 |
 | 普通用户 | `user` | 录像查询、播放、下载 |
 | 未登录用户 | — | 可访问登录页；**录像 API 为可选认证**（见 §6.4 安全说明） |
 
@@ -218,8 +220,9 @@
 | `login_fail` | 登录失败 |
 | `logout` | （预留，当前登出未写审计） |
 | `password_change` | 用户修改密码 |
-| `play` | 单个录像查询/流代理 |
+| `play` | 单个录像查询（`/api/play` 单条） |
 | `play_batch` | 批量录像查询 |
+| `stream` | 流代理访问（`/stream`，v1.1 起独立 action；历史数据可能仍为 `play`+`流代理:` 前缀） |
 | `config_save` | 保存配置或 DVR 列表 |
 | `config_reload` | 重载配置 |
 | `user_create` | 创建用户 |
@@ -243,25 +246,159 @@
 
 验收：启动日志含 `startup + daily 00:00 cleanup enabled`；存在超期数据时启动或次日凌晨后 `audit_log` 行数下降。
 
-### 3.10 管理后台 — SSO 配置（FR-ADMIN-SSO）
+验收：启动日志含 `startup + daily 00:00 cleanup enabled`；存在超期数据时启动或次日凌晨后 `audit_log` 行数下降。
+
+### 3.10 管理后台 — 使用统计 Dashboard（FR-ADMIN-DASH）
+
+> **版本**：v1.1 已实现  
+> **设计原则**：复用现有 `audit_log`，不新增统计表；与审计保留期（默认 3 个月）一致；仅 **admin** 可访问。
+
+**入口**：`/admin/dashboard`（建议作为管理后台菜单第一项）
+
+#### 3.10.1 目标
+
+让管理员快速回答：
+
+1. 今天 / 本周 / 本月系统被**查询**了多少次？**播放（流代理）**了多少次？
+2. 每日调用量趋势如何（时间序列）？
+3. 查询成功率、活跃用户数大致水平？
+
+#### 3.10.2 指标口径（基于 audit_log）
+
+| 指标键 | 含义 | SQL / 规则口径 |
+|--------|------|----------------|
+| `query_single` | 单次录像查询（`POST/GET /api/play` 单条） | `action = 'play'` 且 `detail` 为 `录像已找到` 或 `录像未找到` |
+| `query_batch` | 批量查询 API 调用次数 | `action = 'play_batch'`（每条审计 = 1 次批量请求） |
+| `query_batch_records` | 批量查询涉及的录像条数（可选展示） | 解析 `play_batch` 的 `detail`：`批量查询 N 条，找到 M 条` 中的 **N** 累加 |
+| `stream` | 流代理访问（播放 / 下载走 `/stream`） | `action = 'stream'`，或历史 `action = 'play'` 且 `detail` 以 `流代理:` 开头 |
+| `query_success` / `query_fail` | 单次查询成功 / 失败 | 同上 `query_single`，按 `status` 区分 |
+| `stream_success` / `stream_fail` | 流代理成功 / 失败 | 同上 `stream`，按 `status` 区分 |
+| `active_users` | 活跃用户数 | 时间范围内 `username` 非空的去重计数（统计查询 + 流代理相关 action） |
+| `login_success` | 登录次数（辅助） | `action = 'login_success'`（可选卡片，默认折叠或次要展示） |
+
+**说明**：
+
+- 流代理自 v1.1 起写入 `action=stream`；统计 SQL 同时兼容历史 `play`+`流代理:` 记录。
+- 批量查询在 API 层记 **1 条** `play_batch`，不在每条录像上重复记 `play`。
+- 统计时间按进程时区（Docker 默认 `Asia/Shanghai`）取 `DATE(created_at)` 聚合。
+- 查询范围不得超过 `AUDIT_RETENTION_MONTHS` 保留窗口；超出部分无数据属预期。
+
+#### 3.10.3 功能需求
+
+| 编号 | 需求 | 验收标准 |
+|------|------|----------|
+| FR-ADMIN-DASH-01 | 汇总卡片 | 展示今日 / 近 7 日 / 近 30 日（或自定义区间）的查询次数、流访问次数、查询成功率 |
+| FR-ADMIN-DASH-02 | 日时间序列图 | 折线或柱状图：X 轴为日期，Y 轴为次数；至少支持切换「查询」「流访问」两条序列 |
+| FR-ADMIN-DASH-03 | 时间范围筛选 | 日期选择器：`from` / `to`，默认最近 30 天；最长不超过审计保留期 |
+| FR-ADMIN-DASH-04 | 数据接口 | `GET /api/admin/dashboard/stats`，仅 admin |
+| FR-ADMIN-DASH-05 | 空数据态 | 无审计数据时展示 0 与友好提示，不报错 |
+| FR-ADMIN-DASH-06 | 与审计一致 | 统计数据仅来自保留期内 `audit_log`，与 §3.9 清理策略一致 |
+| FR-ADMIN-DASH-07 | 导航入口 | 管理侧边栏增加「使用统计」，路由 `/admin/dashboard` |
+| FR-ADMIN-DASH-08 | 懒加载 | 前端页面与其他管理页一致 `React.lazy`，图表库按需加载 |
+
+#### 3.10.4 API 设计
+
+**`GET /api/admin/dashboard/stats`**
+
+| 参数 | 类型 | 默认 | 说明 |
+|------|------|------|------|
+| `from` | date `YYYY-MM-DD` | 今天 - 29 天 | 起始日（含） |
+| `to` | date `YYYY-MM-DD` | 今天 | 结束日（含） |
+| `granularity` | `day` | `day` | v1.1 仅支持按日；预留 `week` |
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "range": { "from": "2026-06-08", "to": "2026-07-07", "granularity": "day" },
+  "summary": {
+    "query_single": 120,
+    "query_batch": 8,
+    "query_batch_records": 240,
+    "stream": 95,
+    "query_success_rate": 0.92,
+    "stream_success_rate": 0.98,
+    "active_users": 12,
+    "login_success": 45
+  },
+  "series": [
+    {
+      "date": "2026-07-01",
+      "query_single": 10,
+      "query_batch": 1,
+      "stream": 8,
+      "query_success": 9,
+      "query_fail": 1,
+      "stream_success": 8,
+      "stream_fail": 0
+    }
+  ]
+}
+```
+
+**校验**：
+
+- `from` > `to` → 400；
+- 区间超过保留期 → 自动截断到 `RetentionCutoff()` 并可在响应中加 `truncated: true`（可选）；
+- 单次聚合区间建议上限 90 天（与默认保留 3 个月匹配）。
+
+#### 3.10.5 页面布局（线框）
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 使用统计          [从 2026-06-08] [至 2026-07-07] [查询]     │
+├──────────┬──────────┬──────────┬──────────┬──────────────────┤
+│ 单次查询  │ 批量查询  │ 流访问    │ 查询成功率│ 活跃用户(区间)   │
+│   120    │    8     │   95     │  92%     │      12          │
+├─────────────────────────────────────────────────────────────┤
+│ 每日调用趋势（折线图）                                        │
+│  — 单次查询  — 批量查询  — 流访问                             │
+│     ╱╲    ╱╲                                               │
+│    ╱  ╲__╱  ╲___                                           │
+├─────────────────────────────────────────────────────────────┤
+│ 提示：数据来自审计日志，保留 3 个月；明细见「审计查询」        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- 图表：推荐 `@ant-design/plots`（与 Ant Design 5 一致）；不引入重量级 BI 组件。
+- 汇总卡片与图表共用同一 `from`/`to` 请求，避免重复拉取。
+
+#### 3.10.6 实现要点（供开发）
+
+| 层 | 建议 |
+|----|------|
+| Repository | `AuditRepository.Stats(from, to)`：`GROUP BY date(created_at)` + 条件聚合；复用 `idx_audit_log_created_at` |
+| Handler | `DashboardHandler.GetStats`，注册 `admin.GET("/dashboard/stats", ...)` |
+| 前端 | `pages/Dashboard.jsx`；`services/dashboardService.js` |
+| 测试 | 插入固定 `audit_log` 夹具，断言聚合结果与口径表一致 |
+
+#### 3.10.7 后续可选（非 v1.1）
+
+- 按用户 Top N、按录像编号 Top N；
+- 独立 `stream` action 后简化 SQL；
+- 导出 CSV；
+- 小时级粒度（数据量大时再评估）。
+
+### 3.11 管理后台 — SSO 配置（FR-ADMIN-SSO）
 
 **入口**：`/admin/sso`
 
 管理 OIDC 提供商的完整 CRUD + 启用/停用切换。
 
-### 3.11 公开接口（FR-PUBLIC）
+### 3.12 公开接口（FR-PUBLIC）
 
 | 编号 | 需求 | 验收标准 |
 |------|------|----------|
 | FR-PUBLIC-01 | 健康检查 | `GET/HEAD /health` 返回 200 |
 | FR-PUBLIC-02 | 公开配置摘要 | `GET /api/config` 返回端口、DVR 数量、重试信息、版本号（无敏感信息） |
 
-### 3.12 前端通用（FR-UI）
+### 3.13 前端通用（FR-UI）
 
 | 编号 | 需求 | 验收标准 |
 |------|------|----------|
 | FR-UI-01 | 主题切换 | 支持明/暗主题（Zustand `themeStore`） |
-| FR-UI-02 | 侧边导航 | 普通用户见「录像查询」；管理员额外见管理菜单 |
+| FR-UI-02 | 侧边导航 | 普通用户见「录像查询」；管理员额外见管理菜单（含使用统计 Dashboard） |
 | FR-UI-03 | 用户菜单 | 修改密码、登出 |
 | FR-UI-04 | SPA 路由 | Go `embed` 静态资源；未匹配 API 路径时回退 `index.html` |
 
@@ -278,6 +415,7 @@
 | NFR-PERF-03 | 连接复用 | HTTP Transport `MaxIdleConns=100` |
 | NFR-PERF-04 | 视频代理 | Go `io.Copy` 流式转发，不整文件缓冲 |
 | NFR-PERF-05 | 审计日志容量 | 默认仅保留 3 个月；启动 + 每日自动硬删除，避免 `audit_log` 堆积拖慢查询 |
+| NFR-PERF-06 | Dashboard 聚合 | 单次 `stats` 请求在 3 个月审计数据量下 P95 < 500ms；使用 `created_at` 索引按日 `GROUP BY` |
 
 ### 4.2 可用性
 
@@ -502,6 +640,7 @@ Authorization: Bearer <jwt_token>
 | POST | `/api/admin/dvr-servers` | admin | 更新 DVR 列表 |
 | POST | `/api/admin/reload` | admin | 重载配置 |
 | GET | `/api/admin/audit` | admin | 审计日志 |
+| GET | `/api/admin/dashboard/stats` | admin | 使用统计（v1.1） |
 | POST | `/api/admin/audit/cleanup` | admin | 清理审计 |
 | GET/POST/PUT/DELETE | `/api/admin/users/...` | admin | 用户管理 |
 | GET/POST/PUT/DELETE | `/api/admin/sso/providers/...` | admin | SSO 管理 |
@@ -535,6 +674,24 @@ Authorization: Bearer <jwt_token>
     { "record_id": "GT03225A120DW", "found": false }
   ],
   "message": "batch query completed"
+}
+```
+
+**Dashboard 统计（v1.1）**：
+```json
+{
+  "success": true,
+  "range": { "from": "2026-06-08", "to": "2026-07-07", "granularity": "day" },
+  "summary": {
+    "query_single": 120,
+    "query_batch": 8,
+    "stream": 95,
+    "query_success_rate": 0.92,
+    "active_users": 12
+  },
+  "series": [
+    { "date": "2026-07-07", "query_single": 10, "query_batch": 1, "stream": 8 }
+  ]
 }
 ```
 
@@ -572,7 +729,7 @@ cd backend && go run ./cmd/server          # :8080，仅 API
 cd frontend && npm install && npm run dev  # :3000，代理到 :8080
 
 # 本地单二进制（与生产一致）
-make build && ./dvr-vod-system             # :8080，API + SPA
+make build && ./dvr-manager             # :8080，API + SPA
 ```
 
 ### 8.3 端口
@@ -659,6 +816,7 @@ curl http://localhost:8080/api/config
 - [ ] DVR 服务器增删
 - [ ] 用户 CRUD 及权限约束
 - [ ] 审计日志写入与查询
+- [ ] Dashboard 汇总与按日时间序列与审计口径一致（v1.1）
 - [ ] Docker 重启后数据持久化
 
 ---
@@ -672,6 +830,7 @@ curl http://localhost:8080/api/config
 | 代理 URL | `/stream/{编号}.mp4`，对外暴露的播放地址 |
 | 真实 URL | DVR 上的完整文件地址，仅后端知晓 |
 | 可选认证 | 有 Token 则解析用户信息写审计；无 Token 仍放行 |
+| Dashboard | 管理后台使用统计页，基于 `audit_log` 聚合展示调用量与日趋势 |
 
 ---
 
@@ -679,6 +838,7 @@ curl http://localhost:8080/api/config
 
 | 版本 | 日期 | 作者 | 变更说明 |
 |------|------|------|----------|
+| 1.1.0 | 2026-07-07 | — | 规划管理后台 Dashboard：基于 audit_log 的使用统计与日时间序列（§3.10） |
 | 1.0.3 | 2026-07-07 | — | 前端嵌入 Go 二进制：单容器部署；清理废弃的前端/后端 Docker 与 Nginx 配置 |
 | 1.0.2 | 2026-07-07 | — | 代码质量优化：配置热更新、JWT 抽离、批量并发、SSO fragment、可选强制播放鉴权 |
 | 1.0.1 | 2026-07-07 | — | 明确审计日志 3 个月保留 + 启动/每日自动清理；`AUDIT_RETENTION_MONTHS` |
@@ -694,6 +854,7 @@ curl http://localhost:8080/api/config
 | `/sso-callback` | SsoCallback | 公开 |
 | `/` | Home | 登录 |
 | `/admin` | Admin | admin |
+| `/admin/dashboard` | Dashboard | admin |
 | `/admin/users` | Users | admin |
 | `/admin/audit` | Audit | admin |
 | `/admin/sso` | SsoConfig | admin |

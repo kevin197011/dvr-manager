@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"dvr-vod-system/internal/config"
+	"dvr-manager/internal/config"
 
 	"github.com/gin-gonic/gin"
 )

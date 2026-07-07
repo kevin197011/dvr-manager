@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"dvr-vod-system/internal/repository"
-	"dvr-vod-system/internal/service"
-	"dvr-vod-system/pkg/cache"
+	"dvr-manager/internal/repository"
+	"dvr-manager/internal/service"
+	"dvr-manager/pkg/cache"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,7 +59,7 @@ func (h *ProxyHandler) Handle(c *gin.Context) {
 		url, err := h.dvrService.FindRecording(c.Request.Context(), recordID)
 		if err != nil {
 			if h.auditRepo != nil {
-				_ = h.auditRepo.Insert("play", userStr, roleStr, clientIP, recordID, "流代理: 录像未找到", "fail")
+				_ = h.auditRepo.Insert("stream", userStr, roleStr, clientIP, recordID, "流代理: 录像未找到", "fail")
 			}
 			log.Printf("[WARN] 流代理失败 - 编号: %s, Error: %v", recordID, err)
 			c.JSON(http.StatusNotFound, gin.H{"error": "recording not found"})
@@ -69,7 +69,7 @@ func (h *ProxyHandler) Handle(c *gin.Context) {
 		realURL = url
 		h.cache.Set(recordID, realURL)
 		if h.auditRepo != nil {
-			_ = h.auditRepo.Insert("play", userStr, roleStr, clientIP, recordID, "流代理: 录像已找到", "success")
+			_ = h.auditRepo.Insert("stream", userStr, roleStr, clientIP, recordID, "流代理: 录像已找到", "success")
 		}
 	}
 

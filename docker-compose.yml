@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: dvr-vod
+    container_name: dvr-manager
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -12,7 +12,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DATA_DIR=/app/data
-      - JWT_SECRET=${JWT_SECRET:-dvr-vod-system-secret-key-change-in-production}
+      - JWT_SECRET=${JWT_SECRET:-dvr-manager-secret-key-change-in-production}
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
       - USER_USERNAME=${USER_USERNAME:-user}

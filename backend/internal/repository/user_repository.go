@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"dvr-vod-system/pkg/db"
+	"dvr-manager/pkg/db"
 )
 
 // User 用户实体（密码以哈希形式存储）

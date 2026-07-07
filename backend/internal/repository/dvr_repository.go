@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"dvr-vod-system/pkg/db"
+	"dvr-manager/pkg/db"
 )
 
 // DVRRepository DVR 服务器仓库接口

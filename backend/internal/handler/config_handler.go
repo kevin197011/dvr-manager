@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"dvr-vod-system/internal/config"
+	"dvr-manager/internal/config"
 
 	"github.com/gin-gonic/gin"
 )

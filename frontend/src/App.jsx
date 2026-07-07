@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 
 const Admin = lazy(() => import('./pages/Admin'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Audit = lazy(() => import('./pages/Audit'));
 const Users = lazy(() => import('./pages/Users'));
 const SsoConfig = lazy(() => import('./pages/SsoConfig'));
@@ -37,6 +38,14 @@ function App() {
             }
           >
             <Route index element={<Home />} />
+            <Route
+              path="admin/dashboard"
+              element={
+                <AdminRoute>
+                  <Dashboard />
+                </AdminRoute>
+              }
+            />
             <Route
               path="admin"
               element={

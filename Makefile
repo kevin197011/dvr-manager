@@ -6,9 +6,9 @@ frontend:
 	cp -r frontend/dist backend/internal/web/dist
 
 backend: frontend
-	cd backend && go build -o ../dvr-vod-system ./cmd/server
+	cd backend && go build -o ../dvr-manager ./cmd/server
 
 build: backend
 
 run: build
-	./dvr-vod-system
+	./dvr-manager

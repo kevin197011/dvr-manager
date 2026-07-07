@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	"dvr-vod-system/internal/config"
-	"dvr-vod-system/pkg/db"
+	"dvr-manager/internal/config"
+	"dvr-manager/pkg/db"
 )
 
 // ConfigRepository 配置仓库接口

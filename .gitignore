@@ -1,5 +1,5 @@
 # 二进制文件
-dvr-vod-system
+dvr-manager
 *.exe
 *.exe~
 *.dll
@@ -46,7 +46,7 @@ backend/internal/web/dist/*
 !backend/internal/web/dist/index.html
 
 # 后端
-backend/dvr-vod-system
+backend/dvr-manager
 backend/*.exe
 
 # 临时文件

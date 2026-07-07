@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"dvr-vod-system/pkg/db"
+	"dvr-manager/pkg/db"
 )
 
 func TestDeleteOlderThan_removesExpiredRows(t *testing.T) {
@@ -43,5 +43,60 @@ func TestDeleteOlderThan_removesExpiredRows(t *testing.T) {
 	}
 	if total != 1 || len(list) != 1 || list[0].Resource != "r2" {
 		t.Fatalf("list=%+v total=%d", list, total)
+	}
+}
+
+func TestStats_aggregatesByDay(t *testing.T) {
+	dir := t.TempDir()
+	if err := db.InitDB(dir); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+
+	repo := NewAuditRepository()
+	now := time.Now()
+	day := now.Format("2006-01-02")
+	from := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	to := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+
+	inserts := []struct {
+		action, detail, status string
+	}{
+		{"play", "录像已找到", "success"},
+		{"play", "录像未找到", "fail"},
+		{"play_batch", "批量查询 5 条，找到 3 条", "success"},
+		{"stream", "流代理: 录像已找到", "success"},
+		{"login_success", "登录成功", "success"},
+	}
+	for _, row := range inserts {
+		if err := repo.Insert(row.action, "alice", "user", "127.0.0.1", "", row.detail, row.status); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	stats, err := repo.Stats(from, to)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.Summary.QuerySingle != 2 {
+		t.Fatalf("query_single=%d want 2", stats.Summary.QuerySingle)
+	}
+	if stats.Summary.QueryBatch != 1 {
+		t.Fatalf("query_batch=%d want 1", stats.Summary.QueryBatch)
+	}
+	if stats.Summary.QueryBatchRecords != 5 {
+		t.Fatalf("query_batch_records=%d want 5", stats.Summary.QueryBatchRecords)
+	}
+	if stats.Summary.Stream != 1 {
+		t.Fatalf("stream=%d want 1", stats.Summary.Stream)
+	}
+	if stats.Summary.LoginSuccess != 1 {
+		t.Fatalf("login_success=%d want 1", stats.Summary.LoginSuccess)
+	}
+	if stats.Summary.ActiveUsers != 1 {
+		t.Fatalf("active_users=%d want 1", stats.Summary.ActiveUsers)
+	}
+	if len(stats.Series) != 1 || stats.Series[0].Date != day {
+		t.Fatalf("series=%+v want one day %s", stats.Series, day)
 	}
 }

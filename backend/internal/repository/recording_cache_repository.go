@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"dvr-vod-system/pkg/db"
+	"dvr-manager/pkg/db"
 )
 
 // RecordingCacheRepository 录像局号 → DVR 真实 URL 缓存

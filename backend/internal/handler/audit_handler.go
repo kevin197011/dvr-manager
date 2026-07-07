@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"dvr-vod-system/internal/audit"
-	"dvr-vod-system/internal/repository"
+	"dvr-manager/internal/audit"
+	"dvr-manager/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )

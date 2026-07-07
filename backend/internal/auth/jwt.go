@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const defaultSecret = "dvr-vod-system-secret-key-change-in-production"
+const defaultSecret = "dvr-manager-secret-key-change-in-production"
 
 // Claims JWT 载荷
 type Claims struct {

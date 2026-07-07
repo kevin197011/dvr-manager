@@ -1,14 +1,14 @@
 package router
 
 import (
-	"dvr-vod-system/internal/auth"
-	"dvr-vod-system/internal/config"
-	"dvr-vod-system/internal/handler"
-	"dvr-vod-system/internal/middleware"
-	"dvr-vod-system/internal/repository"
-	"dvr-vod-system/internal/service"
-	"dvr-vod-system/internal/web"
-	"dvr-vod-system/pkg/cache"
+	"dvr-manager/internal/auth"
+	"dvr-manager/internal/config"
+	"dvr-manager/internal/handler"
+	"dvr-manager/internal/middleware"
+	"dvr-manager/internal/repository"
+	"dvr-manager/internal/service"
+	"dvr-manager/internal/web"
+	"dvr-manager/pkg/cache"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,6 +43,7 @@ func NewRouter(cfg *config.Config, cacheTTLDays int, jwt *auth.JWT) *gin.Engine 
 	healthHandler := handler.NewHealthHandler()
 	adminHandler := handler.NewAdminHandler(configService, auditRepo)
 	auditHandler := handler.NewAuditHandler(auditRepo)
+	dashboardHandler := handler.NewDashboardHandler(auditRepo)
 	userHandler := handler.NewUserHandler(authService, auditRepo)
 	ssoHandler := handler.NewSSOHandler(ssoService, authService, auditRepo, jwt)
 	ssoAdminHandler := handler.NewSSOAdminHandler(ssoRepo, ssoService, auditRepo)
@@ -83,6 +84,7 @@ func NewRouter(cfg *config.Config, cacheTTLDays int, jwt *auth.JWT) *gin.Engine 
 		admin.POST("/dvr-servers", adminHandler.UpdateDVRServers)
 		admin.POST("/reload", adminHandler.ReloadConfig)
 		admin.GET("/audit", auditHandler.GetAudit)
+		admin.GET("/dashboard/stats", dashboardHandler.GetStats)
 		admin.POST("/audit/cleanup", auditHandler.Cleanup)
 		admin.GET("/users", userHandler.List)
 		admin.POST("/users", userHandler.Create)

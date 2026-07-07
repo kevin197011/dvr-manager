@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"dvr-vod-system/internal/config"
-	"dvr-vod-system/pkg/httpclient"
+	"dvr-manager/internal/config"
+	"dvr-manager/pkg/httpclient"
 )
 
 // ProxyService 代理服务接口

@@ -4,8 +4,8 @@ import (
 	"log"
 	"sync"
 
-	"dvr-vod-system/internal/config"
-	"dvr-vod-system/internal/repository"
+	"dvr-manager/internal/config"
+	"dvr-manager/internal/repository"
 )
 
 // ConfigService 配置服务接口

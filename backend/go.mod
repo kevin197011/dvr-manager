@@ -1,4 +1,4 @@
-module dvr-vod-system
+module dvr-manager
 
 go 1.25.0
 

@@ -22,6 +22,7 @@ import {
   TeamOutlined,
   KeyOutlined,
   CloudOutlined,
+  DashboardOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
@@ -75,6 +76,11 @@ function Layout() {
     // 只有管理员可以看到系统管理菜单
     ...(user?.role === 'admin'
       ? [
+          {
+            key: '/admin/dashboard',
+            icon: <DashboardOutlined />,
+            label: '使用统计',
+          },
           {
             key: '/admin',
             icon: <SettingOutlined />,

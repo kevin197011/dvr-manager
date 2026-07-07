@@ -83,6 +83,7 @@ export const adminService = {
   updateDVRServers: async (servers) => api.post('/admin/dvr-servers', { servers }),
   reloadConfig: async () => api.post('/admin/reload'),
   getAuditLogs: async (params = {}) => api.get('/admin/audit', { params }),
+  getDashboardStats: async (params = {}) => api.get('/admin/dashboard/stats', { params }),
   listUsers: async () => api.get('/admin/users'),
   createUser: async ({ username, password, role }) =>
     api.post('/admin/users', { username, password, role }),

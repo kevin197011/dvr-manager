@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"dvr-vod-system/internal/repository"
+	"dvr-manager/internal/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )
