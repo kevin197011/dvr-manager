@@ -6,10 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CORSMiddleware CORS 中间件
-func CORSMiddleware(cfg *config.Config) gin.HandlerFunc {
+// CORSMiddleware CORS 中间件（每次请求读取最新配置）
+func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !cfg.CORS.Enabled {
+		cfg := config.GetConfig()
+		if cfg == nil || !cfg.CORS.Enabled {
 			c.Next()
 			return
 		}

@@ -60,8 +60,8 @@ function Layout() {
     };
   }, [userMenuOpen]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
@@ -122,7 +122,7 @@ function Layout() {
       if (res?.success) {
         message.success('密码修改成功，请重新登录');
         setPwdOpen(false);
-        logout();
+        await logout();
         navigate('/login');
       } else {
         message.error(res?.message || '修改失败');
@@ -225,7 +225,7 @@ function Layout() {
           <Outlet />
         </Content>
         <Footer className="app-footer">
-          <div>系统运行部驱动</div>
+          <div>系统运维部</div>
         </Footer>
       </AntLayout>
 

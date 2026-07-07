@@ -21,18 +21,7 @@ import {
 } from '@ant-design/icons';
 import { adminService } from '../services/authService';
 import { useAuthStore } from '../store/authStore';
-
-function formatDateTime(v) {
-  if (!v) return '-';
-  return new Date(v).toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-}
+import { formatDateTime } from '../utils/format';
 
 function Users() {
   const { user: currentUser } = useAuthStore();
@@ -183,7 +172,12 @@ function Users() {
         const isSelf = record.username === currentUser?.username;
         return (
           <Space wrap>
-            <Button size="small" icon={<EditOutlined />} onClick={() => openRole(record)}>
+            <Button
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => openRole(record)}
+              disabled={isSelf}
+            >
               改角色
             </Button>
             <Button

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Card,
   Input,
@@ -8,20 +8,31 @@ import {
   Space,
   Typography,
   Tag,
-  Spin,
   Tooltip,
 } from 'antd';
 import { SearchOutlined, PlayCircleOutlined, DownloadOutlined } from '@ant-design/icons';
 import { dvrService } from '../services/authService';
+import { getApiErrorMessage } from '../utils/format';
 import VideoPlayer from '../components/VideoPlayer';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
+function mapPlayError(error) {
+  if (error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED') {
+    return null;
+  }
+  if (error?.response?.status === 404) {
+    return '未找到';
+  }
+  return getApiErrorMessage(error, '查询失败');
+}
+
 function Home() {
   const [loading, setLoading] = useState(false);
   const [recordIds, setRecordIds] = useState('');
   const [results, setResults] = useState([]);
+  const queryAbortRef = useRef(null);
 
   const handleQuery = async () => {
     if (!recordIds.trim()) {
@@ -32,20 +43,22 @@ function Home() {
     const ids = recordIds
       .split('\n')
       .map((id) => id.trim())
-      .filter((id) => id);
+      .filter(Boolean);
 
     if (ids.length === 0) {
       message.warning('请输入有效的录像编号');
       return;
     }
 
+    queryAbortRef.current?.abort();
+    const controller = new AbortController();
+    queryAbortRef.current = controller;
+
     setLoading(true);
-    
-    // 单个查询
-    if (ids.length === 1) {
-      try {
-        const response = await dvrService.play(ids[0]);
-        if (response && response.success) {
+    try {
+      if (ids.length === 1) {
+        const response = await dvrService.play(ids[0], { signal: controller.signal });
+        if (response?.success) {
           setResults([
             {
               key: ids[0],
@@ -56,7 +69,6 @@ function Home() {
             },
           ]);
         } else {
-          // API 返回失败，但在结果中显示
           setResults([
             {
               key: ids[0],
@@ -67,134 +79,76 @@ function Home() {
             },
           ]);
         }
-      } catch (error) {
-        // 捕获错误（如 404），但在结果中显示，不弹窗
-        let errorMsg = '查询失败';
-        if (error.response?.status === 404) {
-          errorMsg = '未找到';
-        } else if (error.response?.data?.message) {
-          errorMsg = error.response.data.message;
-        } else if (error.message) {
-          errorMsg = error.message;
-        }
-        setResults([
-          {
-            key: ids[0],
-            recordId: ids[0],
-            found: false,
-            playing: false,
-            error: errorMsg,
-          },
-        ]);
-      }
-    } else {
-      // 批量查询
-      try {
-        const response = await dvrService.batchPlay(ids);
-        if (response && response.success && response.results) {
+      } else {
+        const response = await dvrService.batchPlay(ids, { signal: controller.signal });
+        if (response?.success && response.results) {
           setResults(
             response.results.map((r, index) => {
               const recordId = r.record_id || r.recordId || ids[index] || `record-${index}`;
               return {
                 key: recordId || `key-${index}`,
-                recordId: recordId,
-                found: r.found !== undefined ? r.found : false,
+                recordId,
+                found: !!r.found,
                 proxyUrl: r.proxy_url || r.proxyUrl || null,
                 playing: false,
-                error: r.found === false ? (r.message || '未找到') : undefined,
+                error: r.found ? undefined : r.message || '未找到',
               };
             })
           );
         } else {
-          // 批量查询失败，为每个 ID 创建失败结果
+          const err = response?.message || '查询失败';
           setResults(
             ids.map((id, index) => ({
               key: id || `key-${index}`,
               recordId: id,
               found: false,
               playing: false,
-              error: response?.message || '查询失败',
+              error: err,
             }))
           );
         }
-      } catch (error) {
-        // 批量查询出错，为每个 ID 创建失败结果
-        let errorMsg = '查询失败';
-        if (error.response?.status === 404) {
-          errorMsg = '未找到';
-        } else if (error.response?.data?.message) {
-          errorMsg = error.response.data.message;
-        } else if (error.message) {
-          errorMsg = error.message;
-        }
-        setResults(
-          ids.map((id, index) => ({
-            key: id || `key-${index}`,
-            recordId: id,
-            found: false,
-            playing: false,
-            error: errorMsg,
-          }))
-        );
+      }
+    } catch (error) {
+      const errorMsg = mapPlayError(error);
+      if (errorMsg === null) {
+        return;
+      }
+      setResults(
+        ids.map((id, index) => ({
+          key: id || `key-${index}`,
+          recordId: id,
+          found: false,
+          playing: false,
+          error: errorMsg,
+        }))
+      );
+    } finally {
+      if (queryAbortRef.current === controller) {
+        setLoading(false);
       }
     }
-    
-    setLoading(false);
   };
 
   const handleTogglePlay = (recordId) => {
-    setResults(results.map((r) => {
-      if (r.recordId === recordId) {
-        return { ...r, playing: !r.playing };
-      }
-      // 关闭其他正在播放的视频
-      return { ...r, playing: false };
-    }));
+    setResults((prev) =>
+      prev.map((r) => {
+        if (r.recordId === recordId) {
+          return { ...r, playing: !r.playing };
+        }
+        return { ...r, playing: false };
+      })
+    );
   };
 
-  const handleDownload = async (recordId, proxyUrl) => {
-    try {
-      const hide = message.loading({ 
-        content: `正在下载 ${recordId}.mp4...`, 
-        key: `download-${recordId}`,
-        duration: 0 
-      });
-      
-      // 使用 fetch 下载视频
-      const response = await fetch(proxyUrl);
-      if (!response.ok) {
-        hide();
-        throw new Error(`下载失败: ${response.status} ${response.statusText}`);
-      }
-
-      // 创建 Blob
-      const blob = await response.blob();
-      
-      // 创建下载链接
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${recordId}.mp4`;
-      document.body.appendChild(a);
-      a.click();
-      
-      // 清理
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      hide();
-      message.success({ 
-        content: `${recordId}.mp4 下载完成`, 
-        key: `download-${recordId}`,
-        duration: 3 
-      });
-    } catch (error) {
-      message.error({ 
-        content: `下载失败：${error.message || '未知错误'}`, 
-        key: `download-${recordId}`,
-        duration: 5 
-      });
-    }
+  const handleDownload = (recordId, proxyUrl) => {
+    const a = document.createElement('a');
+    a.href = proxyUrl;
+    a.download = `${recordId}.mp4`;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    message.success(`已开始下载 ${recordId}.mp4`);
   };
 
   const columns = [
@@ -202,10 +156,7 @@ function Home() {
       title: '录像编号',
       dataIndex: 'recordId',
       key: 'recordId',
-      render: (text, record) => {
-        // 确保显示录像编号，兼容多种字段名
-        return text || record?.recordId || record?.record_id || '-';
-      },
+      render: (text, record) => text || record?.recordId || '-',
     },
     {
       title: '状态',
@@ -215,16 +166,8 @@ function Home() {
         if (found) {
           return <Tag color="success">已找到</Tag>;
         }
-        // 未找到时，如果有错误信息，使用 Tooltip 显示详情
         const errorTag = <Tag color="error">未找到</Tag>;
-        if (record.error) {
-          return (
-            <Tooltip title={record.error}>
-              {errorTag}
-            </Tooltip>
-          );
-        }
-        return errorTag;
+        return record.error ? <Tooltip title={record.error}>{errorTag}</Tooltip> : errorTag;
       },
     },
     {
@@ -290,12 +233,14 @@ function Home() {
             pagination={false}
             loading={loading}
             expandable={{
-              expandedRowKeys: results.filter(r => r.playing).map(r => r.key),
+              expandedRowKeys: results.filter((r) => r.playing).map((r) => r.key),
               onExpandedRowsChange: (expandedKeys) => {
-                setResults(results.map(r => ({
-                  ...r,
-                  playing: expandedKeys.includes(r.key),
-                })));
+                setResults((prev) =>
+                  prev.map((r) => ({
+                    ...r,
+                    playing: expandedKeys.includes(r.key),
+                  }))
+                );
               },
               expandedRowRender: (record) => {
                 if (!record.found || !record.proxyUrl) {
@@ -303,9 +248,9 @@ function Home() {
                 }
                 return (
                   <div style={{ padding: '16px 0' }}>
-                    <VideoPlayer 
-                      key={record.proxyUrl} 
-                      src={record.proxyUrl} 
+                    <VideoPlayer
+                      key={record.proxyUrl}
+                      src={record.proxyUrl}
                       autoPlay={record.playing}
                     />
                   </div>

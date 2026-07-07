@@ -22,7 +22,6 @@ type configService struct {
 	configRepo repository.ConfigRepository
 	dvrRepo    repository.DVRRepository
 	mu         sync.RWMutex
-	onUpdate   func(*config.Config) // 配置更新回调
 }
 
 // NewConfigService 创建新的配置服务
@@ -76,11 +75,6 @@ func (s *configService) UpdateConfig(cfg *config.Config) error {
 	// 更新全局配置
 	config.SetConfig(cfg)
 
-	// 触发更新回调
-	if s.onUpdate != nil {
-		s.onUpdate(cfg)
-	}
-
 	log.Printf("[INFO] 配置已更新")
 	return nil
 }
@@ -128,11 +122,6 @@ func (s *configService) UpdateDVRServers(servers []string) error {
 	// 更新全局配置
 	config.SetConfig(cfg)
 
-	// 触发更新回调
-	if s.onUpdate != nil {
-		s.onUpdate(cfg)
-	}
-
 	log.Printf("[INFO] DVR 服务器列表已更新，共 %d 个服务器", len(servers))
 	return nil
 }
@@ -157,11 +146,6 @@ func (s *configService) ReloadConfig() error {
 
 	// 更新全局配置
 	config.SetConfig(cfg)
-
-	// 触发更新回调
-	if s.onUpdate != nil {
-		s.onUpdate(cfg)
-	}
 
 	log.Printf("[INFO] 配置已重新加载，共 %d 个 DVR 服务器", len(cfg.DVRServers))
 	return nil

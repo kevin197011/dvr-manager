@@ -77,7 +77,9 @@ func (h *ProxyHandler) Handle(c *gin.Context) {
 
 	if err := h.proxyService.ProxyStream(c.Request.Context(), recordID, realURL, c.Writer, rangeHeader); err != nil {
 		log.Printf("[ERROR] 流代理失败 - 编号: %s, Error: %v", recordID, err)
-		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to fetch video from DVR server"})
+		if !c.Writer.Written() {
+			c.JSON(http.StatusBadGateway, gin.H{"error": "failed to fetch video from DVR server"})
+		}
 		return
 	}
 }

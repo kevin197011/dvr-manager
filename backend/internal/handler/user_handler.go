@@ -160,17 +160,19 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	// 删除时确保至少保留一个管理员
 	if target.Role == "admin" {
 		users, err := h.authService.ListUsers()
-		if err == nil {
-			admins := 0
-			for _, u := range users {
-				if u.Role == "admin" {
-					admins++
-				}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "无法验证管理员数量"})
+			return
+		}
+		admins := 0
+		for _, u := range users {
+			if u.Role == "admin" {
+				admins++
 			}
-			if admins <= 1 {
-				c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "至少保留一个管理员账号"})
-				return
-			}
+		}
+		if admins <= 1 {
+			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "至少保留一个管理员账号"})
+			return
 		}
 	}
 

@@ -145,16 +145,7 @@ export const designSystem = {
 export const getAntdTheme = (themeMode = 'light') => {
   const isDark = themeMode === 'dark';
   const colors = isDark ? designSystem.colors.dark : designSystem.colors.light;
-  
-  // 动态导入 antd theme
-  let darkAlgorithm = undefined;
-  if (isDark) {
-    // 在运行时动态导入
-    import('antd').then((antd) => {
-      darkAlgorithm = antd.theme.darkAlgorithm;
-    });
-  }
-  
+
   return {
     token: {
       // 主色调

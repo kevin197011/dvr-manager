@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"dvr-vod-system/pkg/db"
@@ -118,8 +119,10 @@ func (r *userRepository) Create(username, passwordHash, role string) (*User, err
 		username, passwordHash, role,
 	)
 	if err != nil {
-		// SQLite UNIQUE 冲突
-		return nil, ErrUserExists
+		if strings.Contains(strings.ToLower(err.Error()), "unique") {
+			return nil, ErrUserExists
+		}
+		return nil, fmt.Errorf("create user: %w", err)
 	}
 	id, _ := res.LastInsertId()
 	return r.GetByID(id)

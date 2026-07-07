@@ -84,7 +84,10 @@ function SsoConfig() {
     setOpen(true);
   };
 
+  const [togglingId, setTogglingId] = useState(null);
+
   const onToggle = async (record) => {
+    setTogglingId(record.id);
     try {
       const res = await adminService.toggleSSOProvider(record.id);
       if (res?.success) {
@@ -95,6 +98,8 @@ function SsoConfig() {
       }
     } catch (err) {
       message.error(err?.response?.data?.message || '更新失败');
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -154,7 +159,13 @@ function SsoConfig() {
       dataIndex: 'enabled',
       width: 100,
       render: (v, record) => (
-        <Switch checked={v} onChange={() => onToggle(record)} checkedChildren="启用" unCheckedChildren="停用" />
+        <Switch
+          checked={v}
+          loading={togglingId === record.id}
+          onChange={() => onToggle(record)}
+          checkedChildren="启用"
+          unCheckedChildren="停用"
+        />
       ),
     },
     {

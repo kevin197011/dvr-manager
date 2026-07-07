@@ -21,6 +21,7 @@ services:
       - USER_PASSWORD=${USER_PASSWORD:-user123}
       - RECORD_CACHE_TTL_DAYS=${RECORD_CACHE_TTL_DAYS:-30}
       - AUDIT_RETENTION_MONTHS=${AUDIT_RETENTION_MONTHS:-3}
+      - REQUIRE_AUTH_FOR_PLAY=${REQUIRE_AUTH_FOR_PLAY:-false}
     networks:
       - dvr-network
     healthcheck:

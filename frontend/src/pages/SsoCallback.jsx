@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Result, Spin, Button } from 'antd';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
+function parseHashParams() {
+  const hash = window.location.hash.startsWith('#')
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  return new URLSearchParams(hash);
+}
+
 function SsoCallback() {
-  const [params] = useSearchParams();
   const navigate = useNavigate();
   const { hydrate } = useAuthStore();
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
+    const params = parseHashParams();
     const err = params.get('error');
     if (err) {
       setErrorMsg(err);
@@ -23,9 +30,9 @@ function SsoCallback() {
       return;
     }
     hydrate({ token, user: { username, role: role || 'user' } });
-    // 用 replace 跳到首页，并让 React 在下一帧再执行，确保当前组件先卸载
+    window.history.replaceState(null, '', '/sso-callback');
     navigate('/', { replace: true });
-  }, [params, hydrate, navigate]);
+  }, [hydrate, navigate]);
 
   if (errorMsg) {
     return (

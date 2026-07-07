@@ -66,7 +66,7 @@ cd frontend && npm install && npm run dev
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | 初始管理员 |
 | `USER_USERNAME` / `USER_PASSWORD` | 初始普通用户（可选） |
 
-其他常用变量：`DATA_DIR`、`RECORD_CACHE_TTL_DAYS`（录像 URL 缓存天数，默认 30）、`AUDIT_RETENTION_MONTHS`（审计保留月数，默认 3）。
+其他常用变量：`DATA_DIR`、`RECORD_CACHE_TTL_DAYS`（默认 30）、`AUDIT_RETENTION_MONTHS`（默认 3）、`REQUIRE_AUTH_FOR_PLAY`（默认 false，设为 true 时播放需登录）。
 
 使用 Nginx 反向代理时参考 [NGINX.md](NGINX.md)。
 

@@ -536,6 +536,7 @@ Authorization: Bearer <jwt_token>
 | `USER_PASSWORD` | `user123` | 种子普通用户密码 |
 | `RECORD_CACHE_TTL_DAYS` | `30` | 录像缓存天数 |
 | `AUDIT_RETENTION_MONTHS` | `3` | 审计日志保留月数；启动时 + 每日 00:00 自动清理超期记录 |
+| `REQUIRE_AUTH_FOR_PLAY` | `false` | 设为 `true` 时 `/api/play` 与 `/stream` 强制登录 |
 | `TZ` | — | 时区（Docker 默认 Asia/Shanghai）；影响每日清理触发时刻 |
 | `VITE_API_BASE_URL` | `/api` | 前端 API 基址（构建时） |
 
@@ -652,6 +653,7 @@ curl http://localhost:8080/api/config
 
 | 版本 | 日期 | 作者 | 变更说明 |
 |------|------|------|----------|
+| 1.0.2 | 2026-07-07 | — | 代码质量优化：配置热更新、JWT 抽离、批量并发、SSO fragment、可选强制播放鉴权 |
 | 1.0.1 | 2026-07-07 | — | 明确审计日志 3 个月保留 + 启动/每日自动清理；`AUDIT_RETENTION_MONTHS` |
 | 1.0.0 | 2026-07-07 | — | 基于代码库初始梳理，建立 As-Is 需求基线 |
 

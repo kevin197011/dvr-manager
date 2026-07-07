@@ -14,7 +14,6 @@ import {
   Row,
   Col,
   Tabs,
-  Descriptions,
   Divider,
   Alert,
   Tooltip,
@@ -186,6 +185,7 @@ function Admin() {
         },
         dvr_servers: serverList,
         cors: formValues.cors || {},
+        require_auth_for_play: !!formValues.require_auth_for_play,
       };
 
       const response = await adminService.updateConfig(configData);
@@ -283,6 +283,9 @@ function Admin() {
         <Space>
           <Button icon={<ReloadOutlined />} onClick={loadData}>
             刷新
+          </Button>
+          <Button icon={<ReloadOutlined />} onClick={handleReload} loading={loading}>
+            重载配置
           </Button>
           <Button
             type="primary"
@@ -492,6 +495,18 @@ function Admin() {
                         }
                         name={['dvr', 'skip_tls_verify']}
                         valuePropName="checked"
+                      >
+                        <Switch />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={[24, 16]}>
+                    <Col span={24}>
+                      <Form.Item
+                        label="播放需登录"
+                        name="require_auth_for_play"
+                        valuePropName="checked"
+                        tooltip="开启后 /api/play 与 /stream 必须携带有效 Token（也可用环境变量 REQUIRE_AUTH_FOR_PLAY）"
                       >
                         <Switch />
                       </Form.Item>

@@ -13,20 +13,12 @@ import {
 } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { adminService } from '../services/authService';
+import { formatDateTime } from '../utils/format';
 
 const { RangePicker } = DatePicker;
 
-function formatDateTime(v) {
-  if (!v) return '-';
-  const d = new Date(v);
-  return d.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+function formatAuditTime(v) {
+  return formatDateTime(v);
 }
 
 const ACTION_OPTIONS = [
@@ -119,7 +111,7 @@ function Audit() {
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
-      render: (v) => formatDateTime(v),
+      render: (v) => formatAuditTime(v),
     },
     {
       title: '动作',

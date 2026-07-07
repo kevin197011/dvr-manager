@@ -1,33 +1,28 @@
 package handler
 
 import (
-	"errors"
 	"log"
 	"net/http"
-	"time"
 
+	"dvr-vod-system/internal/auth"
 	"dvr-vod-system/internal/repository"
 	"dvr-vod-system/internal/service"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 // AuthHandler 认证处理器
 type AuthHandler struct {
 	authService service.AuthService
-	jwtSecret   []byte
+	jwt         *auth.JWT
 	auditRepo   repository.AuditRepository
 }
 
-// NewAuthHandler 创建新的认证处理器
-func NewAuthHandler(authService service.AuthService, jwtSecret string, auditRepo repository.AuditRepository) *AuthHandler {
-	if jwtSecret == "" {
-		jwtSecret = "dvr-vod-system-secret-key-change-in-production"
-	}
+// NewAuthHandler 创建认证处理器
+func NewAuthHandler(authService service.AuthService, jwt *auth.JWT, auditRepo repository.AuditRepository) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
-		jwtSecret:   []byte(jwtSecret),
+		jwt:         jwt,
 		auditRepo:   auditRepo,
 	}
 }
@@ -58,106 +53,66 @@ type VerifyResponse struct {
 	User    UserInfo `json:"user,omitempty"`
 }
 
-// Claims JWT Claims
-type Claims struct {
-	Username string `json:"username"`
-	Role     string `json:"role"`
-	jwt.RegisteredClaims
-}
-
-// Login 处理登录请求
+// Login 处理登录
 func (h *AuthHandler) Login(c *gin.Context) {
 	clientIP := c.ClientIP()
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Printf("[AUTH] 登录请求参数错误 - IP: %s, Error: %v", clientIP, err)
-		c.JSON(http.StatusBadRequest, LoginResponse{
-			Success: false,
-			Message: "请求参数错误",
-		})
+		c.JSON(http.StatusBadRequest, LoginResponse{Success: false, Message: "请求参数错误"})
 		return
 	}
 
-	log.Printf("[AUTH] 登录尝试 - IP: %s, 用户名: %s", clientIP, req.Username)
-
-	// 验证用户名和密码
 	user, err := h.authService.Authenticate(req.Username, req.Password)
 	if err != nil {
 		if h.auditRepo != nil {
 			_ = h.auditRepo.Insert("login_fail", req.Username, "", clientIP, "", "登录失败", "fail")
 		}
-		log.Printf("[AUTH] 登录失败 - IP: %s, 用户名: %s, Error: %v", clientIP, req.Username, err)
-		c.JSON(http.StatusUnauthorized, LoginResponse{
-			Success: false,
-			Message: "用户名或密码错误",
-		})
+		c.JSON(http.StatusUnauthorized, LoginResponse{Success: false, Message: "用户名或密码错误"})
 		return
 	}
 
-	// 生成 JWT Token
-	token, err := h.generateToken(user.Username, user.Role)
+	token, err := h.jwt.Generate(user.Username, user.Role)
 	if err != nil {
-		log.Printf("[AUTH] 生成令牌失败 - IP: %s, 用户名: %s, Error: %v", clientIP, user.Username, err)
-		c.JSON(http.StatusInternalServerError, LoginResponse{
-			Success: false,
-			Message: "生成令牌失败",
-		})
+		c.JSON(http.StatusInternalServerError, LoginResponse{Success: false, Message: "生成令牌失败"})
 		return
 	}
 
 	if h.auditRepo != nil {
 		_ = h.auditRepo.Insert("login_success", user.Username, user.Role, clientIP, "", "登录成功", "success")
 	}
-	log.Printf("[AUTH] 登录成功 - IP: %s, 用户名: %s, 角色: %s", clientIP, user.Username, user.Role)
+	log.Printf("[AUTH] 登录成功 - IP: %s, 用户名: %s", clientIP, user.Username)
 	c.JSON(http.StatusOK, LoginResponse{
 		Success: true,
 		Token:   token,
-		User: UserInfo{
-			Username: user.Username,
-			Role:     user.Role,
-		},
+		User:    UserInfo{Username: user.Username, Role: user.Role},
 	})
 }
 
-// Me 获取当前用户信息
+// Me 当前用户
 func (h *AuthHandler) Me(c *gin.Context) {
-	tokenString := c.GetHeader("Authorization")
+	tokenString := auth.ExtractBearer(c.GetHeader("Authorization"))
 	if tokenString == "" {
-		c.JSON(http.StatusUnauthorized, VerifyResponse{
-			Success: false,
-		})
+		c.JSON(http.StatusUnauthorized, VerifyResponse{Success: false})
 		return
 	}
-
-	// 移除 "Bearer " 前缀
-	if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
-		tokenString = tokenString[7:]
-	}
-
-	claims, err := h.parseToken(tokenString)
+	claims, err := h.jwt.Verify(tokenString)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, VerifyResponse{
-			Success: false,
-		})
+		c.JSON(http.StatusUnauthorized, VerifyResponse{Success: false})
 		return
 	}
-
 	c.JSON(http.StatusOK, VerifyResponse{
 		Success: true,
-		User: UserInfo{
-			Username: claims.Username,
-			Role:     claims.Role,
-		},
+		User:    UserInfo{Username: claims.Username, Role: claims.Role},
 	})
 }
 
-// ChangePasswordRequest 修改密码请求
+// ChangePasswordRequest 修改密码
 type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password" binding:"required"`
 	NewPassword string `json:"new_password" binding:"required,min=6"`
 }
 
-// ChangePassword 当前登录用户修改自己的密码
+// ChangePassword 修改密码
 func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	clientIP := c.ClientIP()
 	usernameVal, _ := c.Get("username")
@@ -184,59 +139,10 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	if h.auditRepo != nil {
 		_ = h.auditRepo.Insert("password_change", username, "", clientIP, "", "修改自己的密码", "success")
 	}
-	log.Printf("[AUTH] 密码修改成功 - IP: %s, 用户名: %s", clientIP, username)
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "密码修改成功"})
 }
 
-// Logout 处理登出请求
+// Logout 登出
 func (h *AuthHandler) Logout(c *gin.Context) {
-	clientIP := c.ClientIP()
-	log.Printf("[AUTH] 登出请求 - IP: %s", clientIP)
-	// JWT 是无状态的，登出只需要客户端删除 token
-	// 如果需要服务端控制，可以实现 token 黑名单
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "登出成功",
-	})
-}
-
-// generateToken 生成 JWT Token
-func (h *AuthHandler) generateToken(username, role string) (string, error) {
-	claims := Claims{
-		Username: username,
-		Role:     role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(h.jwtSecret)
-}
-
-// parseToken 解析 JWT Token
-func (h *AuthHandler) parseToken(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
-		}
-		return h.jwtSecret, nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		return claims, nil
-	}
-
-	return nil, errors.New("invalid token")
-}
-
-// VerifyToken 验证 Token（用于中间件）
-func (h *AuthHandler) VerifyToken(tokenString string) (*Claims, error) {
-	return h.parseToken(tokenString)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "登出成功"})
 }

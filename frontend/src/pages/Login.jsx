@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Form, Input, Button, message, Divider, Space } from 'antd';
+import { Form, Input, Button, message, Divider, Space, Spin } from 'antd';
 import {
   UserOutlined,
   LockOutlined,
@@ -13,8 +13,20 @@ import './Login.css';
 function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login, checkAuth, isAuthenticated } = useAuthStore();
   const [ssoProviders, setSsoProviders] = useState([]);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const ok = await checkAuth();
+      if (ok || isAuthenticated()) {
+        navigate('/', { replace: true });
+        return;
+      }
+      setChecking(false);
+    })();
+  }, [checkAuth, isAuthenticated, navigate]);
 
   useEffect(() => {
     (async () => {
@@ -45,6 +57,14 @@ function Login() {
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <div className="login-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div className="login-container">
@@ -186,7 +206,7 @@ function Login() {
         </div>
       </div>
       <div className="login-footer">
-        系统运维部驱动
+        系统运维部
       </div>
     </div>
   );

@@ -2,15 +2,20 @@ package handler
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"time"
+	"strings"
+	"sync"
 
 	"dvr-vod-system/internal/repository"
 	"dvr-vod-system/internal/service"
 	"dvr-vod-system/pkg/cache"
 
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	maxBatchPlaySize = 50
+	batchPlayWorkers = 5
 )
 
 // PlayHandler 播放处理器
@@ -20,7 +25,7 @@ type PlayHandler struct {
 	auditRepo  repository.AuditRepository
 }
 
-// NewPlayHandler 创建新的播放处理器
+// NewPlayHandler 创建播放处理器
 func NewPlayHandler(dvrService service.DVRService, cache cache.Cache, auditRepo repository.AuditRepository) *PlayHandler {
 	return &PlayHandler{
 		dvrService: dvrService,
@@ -57,18 +62,13 @@ type RecordingResult struct {
 	ProxyURL string `json:"proxy_url,omitempty"`
 }
 
-// Handle 处理播放请求（单个录像）
+// Handle 处理播放请求
 func (h *PlayHandler) Handle(c *gin.Context) {
 	var req PlayRequest
 
-	// 支持 JSON 和表单两种方式
 	if c.ContentType() == "application/json" {
 		if err := c.ShouldBindJSON(&req); err != nil {
-			log.Printf("[ERROR] 请求解析失败 - IP: %s, Error: %v", c.ClientIP(), err)
-			c.JSON(http.StatusBadRequest, PlayResponse{
-				Success: false,
-				Message: "invalid request: " + err.Error(),
-			})
+			c.JSON(http.StatusBadRequest, PlayResponse{Success: false, Message: "invalid request: " + err.Error()})
 			return
 		}
 	} else {
@@ -78,56 +78,34 @@ func (h *PlayHandler) Handle(c *gin.Context) {
 		}
 	}
 
-	// 检查是否为批量请求
 	if len(req.RecordIDs) > 0 {
-		log.Printf("[INFO] 批量查询请求 - IP: %s, 数量: %d", c.ClientIP(), len(req.RecordIDs))
 		h.HandleBatch(c, req.RecordIDs)
 		return
 	}
 
-	if req.RecordID == "" {
-		log.Printf("[WARN] 缺少录像编号 - IP: %s", c.ClientIP())
-		c.JSON(http.StatusBadRequest, PlayResponse{
-			Success: false,
-			Message: "record_id is required",
-		})
+	if strings.TrimSpace(req.RecordID) == "" {
+		c.JSON(http.StatusBadRequest, PlayResponse{Success: false, Message: "record_id is required"})
 		return
 	}
 
-	log.Printf("[INFO] 单个查询请求 - IP: %s, 编号: %s", c.ClientIP(), req.RecordID)
+	h.handleSingle(c, strings.TrimSpace(req.RecordID))
+}
 
-	// 使用请求的上下文，每个请求独立互不干扰
+func (h *PlayHandler) handleSingle(c *gin.Context, recordID string) {
 	ctx := c.Request.Context()
+	userStr, roleStr := playActor(c)
 
-	username, _ := c.Get("username")
-	userStr, _ := username.(string)
-	role, _ := c.Get("role")
-	roleStr, _ := role.(string)
-
-	// 查找录像
-	url, err := h.dvrService.FindRecording(ctx, req.RecordID)
+	url, err := h.dvrService.FindRecording(ctx, recordID)
 	if err != nil {
-		if h.auditRepo != nil {
-			_ = h.auditRepo.Insert("play", userStr, roleStr, c.ClientIP(), req.RecordID, "录像未找到", "fail")
-		}
-		log.Printf("[WARN] 录像未找到 - IP: %s, 编号: %s", c.ClientIP(), req.RecordID)
-		c.JSON(http.StatusNotFound, PlayResponse{
-			Success: false,
-			Message: "recording not found",
-		})
+		h.auditPlay(c, userStr, roleStr, recordID, "录像未找到", "fail")
+		c.JSON(http.StatusNotFound, PlayResponse{Success: false, Message: "recording not found"})
 		return
 	}
 
-	// 生成代理 URL，隐藏真实地址
-	proxyURL := fmt.Sprintf("/stream/%s.mp4", req.RecordID)
+	proxyURL := fmt.Sprintf("/stream/%s.mp4", recordID)
+	h.cache.Set(recordID, url)
+	h.auditPlay(c, userStr, roleStr, recordID, "录像已找到", "success")
 
-	// 缓存真实 URL 映射
-	h.cache.Set(req.RecordID, url)
-
-	if h.auditRepo != nil {
-		_ = h.auditRepo.Insert("play", userStr, roleStr, c.ClientIP(), req.RecordID, "录像已找到", "success")
-	}
-	log.Printf("[SUCCESS] 录像找到 - IP: %s, 编号: %s", c.ClientIP(), req.RecordID)
 	c.JSON(http.StatusOK, PlayResponse{
 		Success:  true,
 		ProxyURL: proxyURL,
@@ -135,64 +113,82 @@ func (h *PlayHandler) Handle(c *gin.Context) {
 	})
 }
 
-// HandleBatch 处理批量播放请求
+// HandleBatch 批量查询（有限并发）
 func (h *PlayHandler) HandleBatch(c *gin.Context, recordIDs []string) {
-	ctx := c.Request.Context()
-	startTime := time.Now()
-
-	results := make([]RecordingResult, 0, len(recordIDs))
-	foundCount := 0
-
-	for i, recordID := range recordIDs {
-		// 检查上下文是否已取消
-		select {
-		case <-ctx.Done():
-			log.Printf("[ERROR] 批量查询超时 - IP: %s, 已处理: %d/%d", c.ClientIP(), i, len(recordIDs))
-			c.JSON(http.StatusRequestTimeout, BatchPlayResponse{
-				Success: false,
-				Results: results,
-				Message: "request timeout",
-			})
-			return
-		default:
-		}
-
-		url, err := h.dvrService.FindRecording(ctx, recordID)
-		result := RecordingResult{
-			RecordID: recordID,
-			Found:    err == nil,
-		}
-		if err == nil {
-			// 生成代理 URL
-			proxyURL := fmt.Sprintf("/stream/%s.mp4", recordID)
-			result.ProxyURL = proxyURL
-
-			// 缓存真实 URL 映射
-			h.cache.Set(recordID, url)
-
-			foundCount++
-			log.Printf("[SUCCESS] 批量查询 [%d/%d] - 编号: %s", i+1, len(recordIDs), recordID)
-		} else {
-			log.Printf("[WARN] 批量查询 [%d/%d] - 编号: %s 未找到", i+1, len(recordIDs), recordID)
-		}
-		results = append(results, result)
+	if len(recordIDs) > maxBatchPlaySize {
+		c.JSON(http.StatusBadRequest, BatchPlayResponse{
+			Success: false,
+			Message: fmt.Sprintf("batch size exceeds limit of %d", maxBatchPlaySize),
+		})
+		return
 	}
 
-	duration := time.Since(startTime)
-	username, _ := c.Get("username")
-	userStr, _ := username.(string)
-	role, _ := c.Get("role")
-	roleStr, _ := role.(string)
+	ctx := c.Request.Context()
+	userStr, roleStr := playActor(c)
+	results := make([]RecordingResult, len(recordIDs))
+
+	sem := make(chan struct{}, batchPlayWorkers)
+	var wg sync.WaitGroup
+
+	for i, id := range recordIDs {
+		recordID := strings.TrimSpace(id)
+		results[i].RecordID = recordID
+		if recordID == "" {
+			continue
+		}
+
+		wg.Add(1)
+		go func(idx int, rid string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			if ctx.Err() != nil {
+				return
+			}
+
+			url, err := h.dvrService.FindRecording(ctx, rid)
+			if err != nil {
+				return
+			}
+			proxyURL := fmt.Sprintf("/stream/%s.mp4", rid)
+			h.cache.Set(rid, url)
+			results[idx] = RecordingResult{RecordID: rid, Found: true, ProxyURL: proxyURL}
+		}(i, recordID)
+	}
+
+	wg.Wait()
+
+	foundCount := 0
+	for _, r := range results {
+		if r.Found {
+			foundCount++
+		}
+	}
+
 	if h.auditRepo != nil {
 		detail := fmt.Sprintf("批量查询 %d 条，找到 %d 条", len(recordIDs), foundCount)
 		_ = h.auditRepo.Insert("play_batch", userStr, roleStr, c.ClientIP(), "", detail, "success")
 	}
-	log.Printf("[INFO] 批量查询完成 - IP: %s, 总数: %d, 找到: %d, 耗时: %v",
-		c.ClientIP(), len(recordIDs), foundCount, duration)
 
 	c.JSON(http.StatusOK, BatchPlayResponse{
 		Success: true,
 		Results: results,
 		Message: "batch query completed",
 	})
+}
+
+func playActor(c *gin.Context) (username, role string) {
+	u, _ := c.Get("username")
+	username, _ = u.(string)
+	r, _ := c.Get("role")
+	role, _ = r.(string)
+	return username, role
+}
+
+func (h *PlayHandler) auditPlay(c *gin.Context, user, role, recordID, detail, status string) {
+	if h.auditRepo == nil {
+		return
+	}
+	_ = h.auditRepo.Insert("play", user, role, c.ClientIP(), recordID, detail, status)
 }

@@ -122,10 +122,11 @@ func (h *AdminHandler) GetConfig(c *gin.Context) {
 
 // UpdateConfigRequest 更新配置请求
 type UpdateConfigRequest struct {
-	Server     interface{} `json:"server"`
-	DVR        interface{} `json:"dvr"`
-	DVRServers []string    `json:"dvr_servers"`
-	CORS       interface{} `json:"cors"`
+	Server             interface{} `json:"server"`
+	DVR                interface{} `json:"dvr"`
+	DVRServers         []string    `json:"dvr_servers"`
+	CORS               interface{} `json:"cors"`
+	RequireAuthForPlay *bool       `json:"require_auth_for_play"`
 }
 
 // UpdateConfig 更新完整配置
@@ -181,6 +182,28 @@ func (h *AdminHandler) UpdateConfig(c *gin.Context) {
 	// 更新 DVR 服务器列表
 	if len(req.DVRServers) > 0 {
 		cfg.DVRServers = req.DVRServers
+	}
+
+	// 更新 CORS 配置
+	if req.CORS != nil {
+		if corsMap, ok := req.CORS.(map[string]interface{}); ok {
+			if v, ok := corsMap["enabled"].(bool); ok {
+				cfg.CORS.Enabled = v
+			}
+			if v, ok := corsMap["allow_origins"].(string); ok {
+				cfg.CORS.AllowOrigins = v
+			}
+			if v, ok := corsMap["allow_methods"].(string); ok {
+				cfg.CORS.AllowMethods = v
+			}
+			if v, ok := corsMap["allow_headers"].(string); ok {
+				cfg.CORS.AllowHeaders = v
+			}
+		}
+	}
+
+	if req.RequireAuthForPlay != nil {
+		cfg.RequireAuthForPlay = *req.RequireAuthForPlay
 	}
 
 	// 保存配置
